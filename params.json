@@ -1,6 +1,6 @@
 {
   "name": "Calculator core",
   "tagline": "计算器核心",
-  "body": "### 用法\r\nClone（下载）项目，在Calcore项目上右键生成，会生成. dll文件。\r\n\r\n### 方法\r\nlowCal 只限于加减法运算\r\nMultiply 加减乘除\r\n\r\n`Using Cal_core;`\r\n\r\n`CalCore Cal = new Cal;`\r\n\r\n`double result=\"\";`\r\n\r\n`result=lowCal(\"1+1.1\");`\r\n\r\n返回 [主页](huuhghhgyg.github.io)",
+  "body": "### 用法\r\nClone（下载）项目，在Calcore项目上右键生成，会生成. dll文件。\r\n\r\n### 方法\r\nlowCal 只限于加减法运算\r\nMultiply 加减乘除\r\n\r\n`Using Cal_core;`\r\n\r\n`CalCore Cal = new Cal;`\r\n\r\n`double result=\"\";`\r\n\r\n`result=lowCal(\"1+1.1\");`\r\n\r\n返回主页:huuhghhgyg.github.io)",
   "note": "Don't delete this file! It's used internally to help with page regeneration."
 }
