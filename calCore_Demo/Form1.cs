@@ -20,7 +20,7 @@ namespace calCore_Demo
         private void button1_Click(object sender, EventArgs e)
         {
             CalCore.Class1 cl = new CalCore.Class1();
-            textBox2.Text = cl.Multiply(textBox1.Text);
+            textBox2.Text = cl.adCal(textBox1.Text);
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)

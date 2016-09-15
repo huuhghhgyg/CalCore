@@ -189,5 +189,57 @@ namespace CalCore
             }
             return res;
         }
+
+        public string adCal(string formula)
+        {
+            string forCache = formula;//备份变量
+            /*int Knum = 0;//括号对数
+            while (forCache != "")//检测括号对数
+            {
+                if (forCache.Substring(0, 1) == "(")
+                {
+                    Knum++;
+                }
+                forCache = forCache.Substring(1, forCache.Length - 1);
+            }*/
+
+            int klm = 0;//左括号位置最大值
+            forCache = formula;
+            int loc = 0;//位置计数器
+            int rloc = 0;//右括号位置
+
+            string left = "", k = "", right = "";
+            //string mayEnd = "";
+            while (forCache != "")
+            {
+                if (forCache.Substring(0, 1) == "(")
+                {
+                    klm = loc + 1;//纪录最大的左括号位置
+                    forCache = forCache.Substring(1, forCache.Length - 1);
+                    loc++;
+                }
+                else
+                {
+                    if (forCache.Substring(0, 1) == ")")
+                    {
+                        rloc = loc + 1;//纪录右括号位置
+                        left = formula.Substring(0, klm - 1);//左部分
+                        k = formula.Substring(klm, rloc - klm - 1);//中部
+                        right = formula.Substring(loc + 1, formula.Length - rloc);//右部
+                        k = Multiply(k);
+                        forCache = left + k + right;
+                        klm = 0; loc = 0; rloc = 0;
+                        //mayEnd = forCache;
+                        formula = forCache;
+                    }
+                    else
+                    {
+                        forCache = forCache.Substring(1, forCache.Length - 1);
+                        loc++;
+                    }
+                }
+            }
+            return Multiply(formula);
+        }
     }
 }
