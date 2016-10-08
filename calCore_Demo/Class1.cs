@@ -227,6 +227,26 @@ namespace CalCore
                     forCache = forCache.Substring(1, forCache.Length - 1);
                 }*/
 
+                ////////////////////////////格式化
+                int mube=0;//MultiplyBefore?
+                string cache1, cache2 = "";
+                while (mube!=formula.Length)
+                {
+                    try
+                    {
+                        if (forCache.Substring(mube, 1) == "(" && forCache.Substring(mube-1,1)!="*")
+                        {
+                            cache1 = formula.Substring(0, mube) + "*";
+                            cache2 = formula.Substring(mube, formula.Length - mube);
+                            formula = cache1 + cache2;
+                            forCache = formula;
+                        }
+                    }
+                    catch{}
+                    mube++;
+                }
+                ////////////////////////////
+
                 int klm = 0;//左括号位置最大值
                 forCache = formula;
                 int loc = 0;//位置计数器
