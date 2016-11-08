@@ -92,7 +92,7 @@ namespace CalCore
                 int mulNum = 0;//乘除号个数
                 while (formulaTry != "")
                 {
-                    if (formulaTry.Substring(0, 1) == "*" || formulaTry.Substring(0, 1) == "/")
+                    if (formulaTry.Substring(0, 1) == "*" || formulaTry.Substring(0, 1) == "/"|| formulaTry.Substring(0, 1) == "^")
                     {
                         mulNum++;
                     }
@@ -123,7 +123,7 @@ namespace CalCore
                         saveCache += formulaTry.Substring(0, 1);
                         formulaTry = formulaTry.Substring(1, formulaTry.Length - 1);//去掉第一个字符
                     }
-                    if (formulaTry.Substring(0, 1) == "*" || formulaTry.Substring(0, 1) == "/")
+                    if (formulaTry.Substring(0, 1) == "*" || formulaTry.Substring(0, 1) == "/" || formulaTry.Substring(0, 1) == "^")
                     {//检测是否乘除号，是的话先 【检测*/后面是否+-号，否则加上+】
                      //存前面的，再存自己，true=false，计数++,乘除数计数器++，计入数组
 
@@ -192,7 +192,14 @@ namespace CalCore
             }
             else
             {
-                res = (Convert.ToDouble(fir) / Convert.ToDouble(sec)).ToString();
+                if (sym == "/")
+                {
+                    res = (Convert.ToDouble(fir) / Convert.ToDouble(sec)).ToString();
+                }
+                else
+                {
+                    res = Math.Pow(Convert.ToDouble(fir), Convert.ToDouble(sec)).ToString();
+                }
             }
             return res;
         }
