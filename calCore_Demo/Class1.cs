@@ -79,6 +79,7 @@ namespace CalCore
 
         public string Multiply(string formula)
         {
+            formula = calPow(formula);
             try
             {
                 ////////////////检测开头有没有符号，没有就加上
@@ -92,7 +93,7 @@ namespace CalCore
                 int mulNum = 0;//乘除号个数
                 while (formulaTry != "")
                 {
-                    if (formulaTry.Substring(0, 1) == "*" || formulaTry.Substring(0, 1) == "/"|| formulaTry.Substring(0, 1) == "^")
+                    if (formulaTry.Substring(0, 1) == "*" || formulaTry.Substring(0, 1) == "/")
                     {
                         mulNum++;
                     }
@@ -123,7 +124,7 @@ namespace CalCore
                         saveCache += formulaTry.Substring(0, 1);
                         formulaTry = formulaTry.Substring(1, formulaTry.Length - 1);//去掉第一个字符
                     }
-                    if (formulaTry.Substring(0, 1) == "*" || formulaTry.Substring(0, 1) == "/" || formulaTry.Substring(0, 1) == "^")
+                    if (formulaTry.Substring(0, 1) == "*" || formulaTry.Substring(0, 1) == "/")
                     {//检测是否乘除号，是的话先 【检测*/后面是否+-号，否则加上+】
                      //存前面的，再存自己，true=false，计数++,乘除数计数器++，计入数组
 
@@ -182,6 +183,55 @@ namespace CalCore
             }
         }
 
+        public string calPow(string formula)
+        {
+            string forBK = formula;
+            string addUp="",fir="",sec = "";
+            while (forBK != "")
+            {
+                if (forBK.Substring(0, 1) == "^")
+                {//检测到次方符号
+                    try
+                    {
+                        while (forBK.Substring(0, 1) != "+" && forBK.Substring(0, 1) != "-" && forBK.Substring(0, 1) != "*" && forBK.Substring(0, 1) != "/")
+                        {
+                            forBK = forBK.Substring(1, forBK.Length - 1);
+                            if (forBK.Substring(0, 1) != "+" && forBK.Substring(0, 1) != "-" && forBK.Substring(0, 1) != "*" && forBK.Substring(0, 1) != "/")
+                            {
+                                sec += forBK.Substring(0, 1);
+                            }
+                            else
+                            {
+                                break;
+                            }
+                            addUp += (Math.Pow(Convert.ToDouble(fir), Convert.ToDouble(sec))).ToString();
+                            fir = ""; sec = "";
+                        }
+                    }
+                    catch { }
+                }
+                try
+                {
+                    if (forBK.Substring(0, 1) == "+" || forBK.Substring(0, 1) == "-" || forBK.Substring(0, 1) == "*" || forBK.Substring(0, 1) == "/")
+                    {
+                        addUp += fir;
+                        fir = "";
+                        addUp += forBK.Substring(0, 1);
+                    }
+                    else
+                    {
+                        fir += forBK.Substring(0, 1);
+                    }
+                    forBK = forBK.Substring(1, forBK.Length - 1);
+                }
+                catch { }
+                }
+            if (fir != "")
+            {
+                addUp += fir;
+            }
+            return addUp;
+        }
 
         private string calMu(string fir, string sym, string sec)
         {
