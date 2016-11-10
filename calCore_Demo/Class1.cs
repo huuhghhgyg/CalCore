@@ -186,17 +186,17 @@ namespace CalCore
         public string calPow(string formula)
         {
             string forBK = formula;
-            string addUp="",fir="",sec = "";
+            string addUp = "", fir = "", sec = "";
             while (forBK != "")
             {
                 if (forBK.Substring(0, 1) == "^")
                 {//检测到次方符号
-                    try
+                    while (forBK.Substring(0, 1) != "+" && forBK.Substring(0, 1) != "-" && forBK.Substring(0, 1) != "*" && forBK.Substring(0, 1) != "/")
                     {
-                        while (forBK.Substring(0, 1) != "+" && forBK.Substring(0, 1) != "-" && forBK.Substring(0, 1) != "*" && forBK.Substring(0, 1) != "/")
+                        forBK = forBK.Substring(1, forBK.Length - 1);
+                        if (forBK != "")
                         {
-                            forBK = forBK.Substring(1, forBK.Length - 1);
-                            if (forBK.Substring(0, 1) != "+" && forBK.Substring(0, 1) != "-" && forBK.Substring(0, 1) != "*" && forBK.Substring(0, 1) != "/")
+                            if (forBK.Substring(0, 1) != "+" && forBK.Substring(0, 1) != "-" && forBK.Substring(0, 1) != "*" && forBK.Substring(0, 1) != "/" && forBK.Substring(0,1)!="^")
                             {
                                 sec += forBK.Substring(0, 1);
                             }
@@ -204,13 +204,18 @@ namespace CalCore
                             {
                                 break;
                             }
-                            addUp += (Math.Pow(Convert.ToDouble(fir), Convert.ToDouble(sec))).ToString();
-                            fir = ""; sec = "";
+                        }
+                        else
+                        {
+                            break;
                         }
                     }
-                    catch { }
+                    addUp += (Math.Pow(Convert.ToDouble(fir), Convert.ToDouble(sec))).ToString();
+                    forBK = addUp + forBK;
+                    addUp = "";
+                    fir = ""; sec = "";
                 }
-                try
+                if (forBK != "")
                 {
                     if (forBK.Substring(0, 1) == "+" || forBK.Substring(0, 1) == "-" || forBK.Substring(0, 1) == "*" || forBK.Substring(0, 1) == "/")
                     {
@@ -224,8 +229,7 @@ namespace CalCore
                     }
                     forBK = forBK.Substring(1, forBK.Length - 1);
                 }
-                catch { }
-                }
+            }
             if (fir != "")
             {
                 addUp += fir;
