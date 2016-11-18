@@ -10,69 +10,76 @@ namespace CalCore
     {
         public string lowCal(string math)
         {
-            int symMath = 0;
-            if (math == "")
+            try
             {
-                return "0";
-            }
-            else
-            {
-                if (math.Substring(0, 1) != "+" || math.Substring(0, 1) != "-")//开头补符号
+                int symMath = 0;
+                if (math == "")//输入值为空，返回0
                 {
-                    math = "+" + math;
-                    string test = math.Substring(0, 1);
+                    return "0";
                 }
-                string mathCache = math;
-                while (mathCache != "")//检测数值个数
+                else
                 {
-                    if (mathCache.Substring(0, 1) == "+" || mathCache.Substring(0, 1) == "-")
+                    if (math.Substring(0, 1) != "+" && math.Substring(0, 1) != "-")//开头补符号
                     {
-                        symMath++;
+                        math = "+" + math;
                     }
-                    mathCache = mathCache.Substring(1, mathCache.Length - 1);
-                }
-                double[] eachMath;
-                eachMath = new double[symMath];
-                mathCache = math;
-                string numNC = "";
-                int numAC = 0;
-                string sym = "";
-                while (mathCache != "")
-                {
-                    if (mathCache.Substring(0, 1) == "+" || mathCache.Substring(0, 1) == "-")
+                    string mathCache = math;
+                    while (mathCache != "")//检测数值个数
                     {
-                        if (sym == "")//符号
+                        if (mathCache.Substring(0, 1) == "+" || mathCache.Substring(0, 1) == "-")
                         {
-                            sym = mathCache.Substring(0, 1);
+                            symMath++;
+                        }
+                        mathCache = mathCache.Substring(1, mathCache.Length - 1);
+                    }
+                    double[] eachMath;//每个数值相加得结果
+                    eachMath = new double[symMath];//初始化数组
+                    mathCache = math;//将"草稿math"值进行抄写
+                    string numNC = "";//数值暂储
+                    int numAC = 0;//累计加减次数
+                    string sym = "";//符号变量初始化
+                    while (mathCache != "")//填充
+                    {
+                        if (mathCache.Substring(0, 1) == "+" || mathCache.Substring(0, 1) == "-")
+                        {
+                            if (sym == "")//符号
+                            {
+                                sym = mathCache.Substring(0, 1);
+                            }
+                            else
+                            {
+                                eachMath[numAC] = Convert.ToDouble(sym + numNC);
+                                numNC = "";
+                                numAC++;
+                                sym = mathCache.Substring(0, 1);
+                            }
                         }
                         else
                         {
-                            eachMath[numAC] = Convert.ToDouble(sym + numNC);
-                            numNC = "";
-                            numAC++;
-                            sym = mathCache.Substring(0, 1);
+                            numNC += mathCache.Substring(0, 1);
                         }
+                        mathCache = mathCache.Substring(1, mathCache.Length - 1);
                     }
-                    else
-                    {
-                        numNC += mathCache.Substring(0, 1);
-                    }
-                    mathCache = mathCache.Substring(1, mathCache.Length - 1);
-                }
-                eachMath[numAC] = Convert.ToDouble(sym + numNC);
+                    eachMath[numAC] = Convert.ToDouble(sym + numNC);
 
-                //叠加所有数值
-                double calCache = 0;
-                for (int i = 0; i != symMath; i++)//有问题，暂留
-                {
-                    calCache += eachMath[i];
+                    //叠加所有数值
+                    double calCache = 0;
+                    for (int i = 0; i != symMath; i++)//有问题，暂留
+                    {
+                        calCache += eachMath[i];
+                    }
+                    return calCache.ToString();
                 }
-                return calCache.ToString();
+            }
+            catch
+            {
+                return "Error";//返回报告未知错误
             }
         }
 
         public string Multiply(string formula)
         {
+            formula = calPow(formula);
             try
             {
                 ////////////////检测开头有没有符号，没有就加上
@@ -176,70 +183,173 @@ namespace CalCore
             }
         }
 
-        private string calMu(string fir,string sym,string sec)
+        public string calPow(string formula)
+        {
+            string forBK = formula;
+            string addUp = "", fir = "", sec = "";
+            while (forBK != "")
+            {
+                if (forBK.Substring(0, 1) == "^")
+                {//检测到次方符号
+                    while (forBK.Substring(0, 1) != "+" && forBK.Substring(0, 1) != "-" && forBK.Substring(0, 1) != "*" && forBK.Substring(0, 1) != "/")
+                    {
+                        forBK = forBK.Substring(1, forBK.Length - 1);
+                        if (forBK != "")
+                        {
+                            if (forBK.Substring(0, 1) != "+" && forBK.Substring(0, 1) != "-" && forBK.Substring(0, 1) != "*" && forBK.Substring(0, 1) != "/" && forBK.Substring(0,1)!="^")
+                            {
+                                sec += forBK.Substring(0, 1);
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    addUp += (Math.Pow(Convert.ToDouble(fir), Convert.ToDouble(sec))).ToString();
+                    forBK = addUp + forBK;
+                    addUp = "";
+                    fir = ""; sec = "";
+                }
+                if (forBK != "")
+                {
+                    if (forBK.Substring(0, 1) == "+" || forBK.Substring(0, 1) == "-" || forBK.Substring(0, 1) == "*" || forBK.Substring(0, 1) == "/")
+                    {
+                        addUp += fir;
+                        fir = "";
+                        addUp += forBK.Substring(0, 1);
+                    }
+                    else
+                    {
+                        fir += forBK.Substring(0, 1);
+                    }
+                    forBK = forBK.Substring(1, forBK.Length - 1);
+                }
+            }
+            if (fir != "")
+            {
+                addUp += fir;
+            }
+            return addUp;
+        }
+
+        private string calMu(string fir, string sym, string sec)
         {
             string res = "";
             if (sym == "*")
             {
-                res=(Convert.ToDouble(fir) * Convert.ToDouble(sec)).ToString();
+                res = (Convert.ToDouble(fir) * Convert.ToDouble(sec)).ToString();
             }
             else
             {
-                res=(Convert.ToDouble(fir) / Convert.ToDouble(sec)).ToString();
+                if (sym == "/")
+                {
+                    res = (Convert.ToDouble(fir) / Convert.ToDouble(sec)).ToString();
+                }
+                else
+                {
+                    res = Math.Pow(Convert.ToDouble(fir), Convert.ToDouble(sec)).ToString();
+                }
             }
             return res;
         }
 
+
+        public string plus(string fir,string sym,string sec)
+        {
+            switch (sym)
+            {
+                case "*":
+                    return (Convert.ToDouble(fir) * Convert.ToDouble(sec)).ToString();
+
+                case "/":
+                    return (Convert.ToDouble(fir) / Convert.ToDouble(sec)).ToString();
+            }
+            return "0";
+        }
+
         public string adCal(string formula)
         {
-            string forCache = formula;//备份变量
-            /*int Knum = 0;//括号对数
-            while (forCache != "")//检测括号对数
+            try
             {
-                if (forCache.Substring(0, 1) == "(")
-                {
-                    Knum++;
-                }
-                forCache = forCache.Substring(1, forCache.Length - 1);
-            }*/
+                string forCache = formula;//备份变量
 
-            int klm = 0;//左括号位置最大值
-            forCache = formula;
-            int loc = 0;//位置计数器
-            int rloc = 0;//右括号位置
-
-            string left = "", k = "", right = "";
-            //string mayEnd = "";
-            while (forCache != "")
-            {
-                if (forCache.Substring(0, 1) == "(")
+                /*int Knum = 0;//括号对数
+                while (forCache != "")//检测括号对数
                 {
-                    klm = loc + 1;//纪录最大的左括号位置
-                    forCache = forCache.Substring(1, forCache.Length - 1);
-                    loc++;
-                }
-                else
-                {
-                    if (forCache.Substring(0, 1) == ")")
+                    if (forCache.Substring(0, 1) == "(")
                     {
-                        rloc = loc + 1;//纪录右括号位置
-                        left = formula.Substring(0, klm - 1);//左部分
-                        k = formula.Substring(klm, rloc - klm - 1);//中部
-                        right = formula.Substring(loc + 1, formula.Length - rloc);//右部
-                        k = Multiply(k);
-                        forCache = left + k + right;
-                        klm = 0; loc = 0; rloc = 0;
-                        //mayEnd = forCache;
-                        formula = forCache;
+                        Knum++;
                     }
-                    else
+                    forCache = forCache.Substring(1, forCache.Length - 1);
+                }*/
+
+                ////////////////////////////格式化
+                int mube=0;//MultiplyBefore?
+                string cache1, cache2 = "";
+                while (mube!=formula.Length)
+                {
+                    try
                     {
+                        if (forCache.Substring(mube, 1) == "(" && forCache.Substring(mube-1,1)!="*")
+                        {
+                            cache1 = formula.Substring(0, mube) + "*";
+                            cache2 = formula.Substring(mube, formula.Length - mube);
+                            formula = cache1 + cache2;
+                            forCache = formula;
+                        }
+                    }
+                    catch{}
+                    mube++;
+                }
+                ////////////////////////////
+
+                int klm = 0;//左括号位置最大值
+                forCache = formula;
+                int loc = 0;//位置计数器
+                int rloc = 0;//右括号位置
+
+                string left = "", k = "", right = "";
+                //string mayEnd = "";
+                while (forCache != "")
+                {
+                    if (forCache.Substring(0, 1) == "(")
+                    {
+                        klm = loc + 1;//纪录最大的左括号位置
                         forCache = forCache.Substring(1, forCache.Length - 1);
                         loc++;
                     }
+                    else
+                    {
+                        if (forCache.Substring(0, 1) == ")")
+                        {
+                            rloc = loc + 1;//纪录右括号位置
+                            left = formula.Substring(0, klm - 1);//左部分
+                            k = formula.Substring(klm, rloc - klm - 1);//中部
+                            right = formula.Substring(loc + 1, formula.Length - rloc);//右部
+                            k = Multiply(k);
+                            forCache = left + k + right;
+                            klm = 0; loc = 0; rloc = 0;
+                            //mayEnd = forCache;
+                            formula = forCache;
+                        }
+                        else
+                        {
+                            forCache = forCache.Substring(1, forCache.Length - 1);
+                            loc++;
+                        }
+                    }
                 }
+                return Multiply(formula);
             }
-            return Multiply(formula);
+            catch
+            {
+                return "Error";
+            }
         }
     }
 }
