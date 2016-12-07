@@ -77,9 +77,12 @@ namespace CalCore
             }
         }
 
-        public string Multiply(string formula)
+        public string Multiply(string formula,bool calpow)
         {
-            formula = calPow(formula);
+            if (calpow == true)
+            {
+                formula = calPow(formula);
+            }
             try
             {
                 ////////////////检测开头有没有符号，没有就加上
@@ -331,7 +334,7 @@ namespace CalCore
                             left = formula.Substring(0, klm - 1);//左部分
                             k = formula.Substring(klm, rloc - klm - 1);//中部
                             right = formula.Substring(loc + 1, formula.Length - rloc);//右部
-                            k = Multiply(k);
+                            k = Multiply(k,true);
                             forCache = left + k + right;
                             klm = 0; loc = 0; rloc = 0;
                             //mayEnd = forCache;
@@ -344,7 +347,7 @@ namespace CalCore
                         }
                     }
                 }
-                return Multiply(formula);
+                return Multiply(formula,true);
             }
             catch
             {
