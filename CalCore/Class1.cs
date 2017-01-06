@@ -19,14 +19,14 @@ namespace CalCore
                 }
                 else
                 {
-                    if (math.Substring(0, 1) != "+" && math.Substring(0, 1) != "-")//开头补符号
+                    if (math[0].ToString().IndexOfAny("+-".ToArray())==-1)//开头补符号
                     {
                         math = "+" + math;
                     }
                     string mathCache = math;
                     while (mathCache != "")//检测数值个数
                     {
-                        if (mathCache.Substring(0, 1) == "+" || mathCache.Substring(0, 1) == "-")
+                        if (mathCache[0].ToString().IndexOfAny("+-".ToArray())!=-1)
                         {
                             symMath++;
                         }
@@ -40,23 +40,23 @@ namespace CalCore
                     string sym = "";//符号变量初始化
                     while (mathCache != "")//填充
                     {
-                        if (mathCache.Substring(0, 1) == "+" || mathCache.Substring(0, 1) == "-")
+                        if (mathCache[0].ToString().IndexOfAny("+-".ToArray()) != -1)
                         {
                             if (sym == "")//符号
                             {
-                                sym = mathCache.Substring(0, 1);
+                                sym = mathCache[0].ToString();
                             }
                             else
                             {
                                 eachMath[numAC] = Convert.ToDouble(sym + numNC);
                                 numNC = "";
                                 numAC++;
-                                sym = mathCache.Substring(0, 1);
+                                sym = mathCache[0].ToString();
                             }
                         }
                         else
                         {
-                            numNC += mathCache.Substring(0, 1);
+                            numNC += mathCache[0].ToString();
                         }
                         mathCache = mathCache.Substring(1, mathCache.Length - 1);
                     }
@@ -86,7 +86,7 @@ namespace CalCore
             try
             {
                 ////////////////检测开头有没有符号，没有就加上
-                if (formula.Substring(0, 1) != "+" && formula.Substring(0, 1) != "-")
+                if (formula[0].ToString().IndexOfAny("+-".ToArray()) ==-1)
                 {
                     formula = "+" + formula;
                 }
@@ -96,7 +96,7 @@ namespace CalCore
                 int mulNum = 0;//乘除号个数
                 while (formulaTry != "")
                 {
-                    if (formulaTry.Substring(0, 1) == "*" || formulaTry.Substring(0, 1) == "/")
+                    if (formulaTry[0].ToString().IndexOfAny("*/".ToArray())!=-1)
                     {
                         mulNum++;
                     }
@@ -124,38 +124,38 @@ namespace CalCore
                     if (firstChk == false)//第一次的符号或者数字
                     {
                         firstChk = true;
-                        saveCache += formulaTry.Substring(0, 1);
+                        saveCache += formulaTry[0].ToString();
                         formulaTry = formulaTry.Substring(1, formulaTry.Length - 1);//去掉第一个字符
                     }
-                    if (formulaTry.Substring(0, 1) == "*" || formulaTry.Substring(0, 1) == "/")
+                    if (formulaTry[0].ToString().IndexOfAny("*/".ToArray())!=-1 )
                     {//检测是否乘除号，是的话先 【检测*/后面是否+-号，否则加上+】
                      //存前面的，再存自己，true=false，计数++,乘除数计数器++，计入数组
 
-                        //是乘号
+                        //是乘号 ((((((需修改))))))
                         if (formulaTry.Substring(1, 1) != "+" && formulaTry.Substring(1, 1) != "-")//后面有没有+-，没有？
                         {//*5
-                            formulaTry = formulaTry.Substring(0, 1) + "+" + formulaTry.Substring(1, formulaTry.Length - 1);
+                            formulaTry = formulaTry[0].ToString() + "+" + formulaTry.Substring(1, formulaTry.Length - 1);
                         }
                         grp[gn] = saveCache;
                         saveCache = "";
                         gn++;//等会需要加入组，组数先加1【计数++】
                         muNum[mulNum] = gn;
                         mulNum++;
-                        grp[gn] = formulaTry.Substring(0, 1);
+                        grp[gn] = formulaTry[0].ToString();
                         gn++;
                         firstChk = false;
                     }
                     else
                     {
-                        if ((formulaTry.Substring(0, 1) == "-" || formulaTry.Substring(0, 1) == "+"))//检测是否加减号,是的话先把前面的cache存入数组再把自己加入cache，计数++
+                        if ((formulaTry[0].ToString().IndexOfAny("+-".ToArray())!=-1))//检测是否加减号,是的话先把前面的cache存入数组再把自己加入cache，计数++
                         {
                             grp[gn] = saveCache;
                             gn++;//等会需要加入组，组数先加1【计数++】
-                            saveCache = formulaTry.Substring(0, 1);
+                            saveCache = formulaTry[0].ToString();
                         }
                         else
                         {//数字或小数点
-                            saveCache += formulaTry.Substring(0, 1);
+                            saveCache += formulaTry[0].ToString();
                         }
                     }
                     formulaTry = formulaTry.Substring(1, formulaTry.Length - 1);//去掉第一个字符
@@ -192,16 +192,16 @@ namespace CalCore
             string addUp = "", fir = "", sec = "";
             while (forBK != "")
             {
-                if (forBK.Substring(0, 1) == "^")
+                if (forBK[0].ToString() == "^")
                 {//检测到次方符号
-                    while (forBK.Substring(0, 1) != "+" && forBK.Substring(0, 1) != "-" && forBK.Substring(0, 1) != "*" && forBK.Substring(0, 1) != "/")
+                    while (forBK[0].ToString() != "+" && forBK[0].ToString() != "-" && forBK[0].ToString() != "*" && forBK[0].ToString() != "/")
                     {
                         forBK = forBK.Substring(1, forBK.Length - 1);
                         if (forBK != "")
                         {
-                            if (forBK.Substring(0, 1) != "+" && forBK.Substring(0, 1) != "-" && forBK.Substring(0, 1) != "*" && forBK.Substring(0, 1) != "/" && forBK.Substring(0,1)!="^")
+                            if (forBK[0].ToString() != "+" && forBK[0].ToString() != "-" && forBK[0].ToString() != "*" && forBK[0].ToString() != "/" && forBK.Substring(0,1)!="^")
                             {
-                                sec += forBK.Substring(0, 1);
+                                sec += forBK[0].ToString();
                             }
                             else
                             {
@@ -220,15 +220,15 @@ namespace CalCore
                 }
                 if (forBK != "")
                 {
-                    if (forBK.Substring(0, 1) == "+" || forBK.Substring(0, 1) == "-" || forBK.Substring(0, 1) == "*" || forBK.Substring(0, 1) == "/")
+                    if (forBK[0].ToString().IndexOfAny("+-*/".ToArray())!=-1)
                     {
                         addUp += fir;
                         fir = "";
-                        addUp += forBK.Substring(0, 1);
+                        addUp += forBK[0].ToString();
                     }
                     else
                     {
-                        fir += forBK.Substring(0, 1);
+                        fir += forBK[0].ToString();
                     }
                     forBK = forBK.Substring(1, forBK.Length - 1);
                 }
@@ -284,7 +284,7 @@ namespace CalCore
                 /*int Knum = 0;//括号对数
                 while (forCache != "")//检测括号对数
                 {
-                    if (forCache.Substring(0, 1) == "(")
+                    if (forCache[0].ToString() == "(")
                     {
                         Knum++;
                     }
@@ -320,7 +320,7 @@ namespace CalCore
                 //string mayEnd = "";
                 while (forCache != "")
                 {
-                    if (forCache.Substring(0, 1) == "(")
+                    if (forCache[0].ToString() == "(")
                     {
                         klm = loc + 1;//纪录最大的左括号位置
                         forCache = forCache.Substring(1, forCache.Length - 1);
@@ -328,7 +328,7 @@ namespace CalCore
                     }
                     else
                     {
-                        if (forCache.Substring(0, 1) == ")")
+                        if (forCache[0].ToString() == ")")
                         {
                             rloc = loc + 1;//纪录右括号位置
                             left = formula.Substring(0, klm - 1);//左部分
