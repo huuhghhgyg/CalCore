@@ -13,7 +13,7 @@ namespace CalCore
             try
             {
                 int symMath = 0;
-                if (math == "")//输入值为空，返回0
+                if (math.Length == 0)//输入值为空，返回0
                 {
                     return "0";
                 }
@@ -24,7 +24,7 @@ namespace CalCore
                         math = "+" + math;
                     }
                     string mathCache = math;
-                    while (mathCache != "")//检测数值个数
+                    while (mathCache.Length != 0)//检测数值个数
                     {
                         if (mathCache[0].ToString().IndexOfAny("+-".ToArray())!=-1)
                         {
@@ -42,7 +42,7 @@ namespace CalCore
                     {
                         if (mathCache[0].ToString().IndexOfAny("+-".ToArray()) != -1)
                         {
-                            if (sym == "")//符号
+                            if (sym.Length == 0)//符号
                             {
                                 sym = mathCache[0].ToString();
                             }
@@ -56,6 +56,12 @@ namespace CalCore
                         }
                         else
                         {
+                            if (mathCache.Substring(0, 1) == "E")
+                            {
+                                numNC += mathCache.Substring(0, 1);
+                                mathCache = mathCache + "+0";
+                                mathCache = mathCache.Substring(1, mathCache.Length - 1);
+                            }
                             numNC += mathCache[0].ToString();
                         }
                         mathCache = mathCache.Substring(1, mathCache.Length - 1);
@@ -94,7 +100,7 @@ namespace CalCore
                 ///////////////记乘除号
                 string formulaTry = formula;
                 int mulNum = 0;//乘除号个数
-                while (formulaTry != "")
+                while (formulaTry.Length != 0)
                 {
                     if (formulaTry[0].ToString().IndexOfAny("*/".ToArray())!=-1)
                     {
@@ -119,7 +125,7 @@ namespace CalCore
                 int gn = 0;//组数
                 mulNum = 0;//记乘号位置
                            //while (formulaTry.Substring(formulaTry.IndexOf("*"),1)!="+"&& formulaTry.Substring(formulaTry.IndexOf("*"), 1) != "-")//检测*/后面的符号
-                while (formulaTry != "")//分组
+                while (formulaTry.Length != 0)//分组
                 {
                     if (firstChk == false)//第一次的符号或者数字
                     {
@@ -190,7 +196,7 @@ namespace CalCore
         {
             string forBK = formula;
             string addUp = "", fir = "", sec = "";
-            while (forBK != "")
+            while (forBK.Length != 0)
             {
                 if (forBK[0].ToString() == "^")
                 {//检测到次方符号
@@ -218,7 +224,7 @@ namespace CalCore
                     addUp = "";
                     fir = ""; sec = "";
                 }
-                if (forBK != "")
+                if (forBK.Length != 0)
                 {
                     if (forBK[0].ToString().IndexOfAny("+-*/".ToArray())!=-1)
                     {
@@ -233,7 +239,7 @@ namespace CalCore
                     forBK = forBK.Substring(1, forBK.Length - 1);
                 }
             }
-            if (fir != "")
+            if (fir.Length != 0)
             {
                 addUp += fir;
             }
@@ -318,7 +324,7 @@ namespace CalCore
 
                 string left = "", k = "", right = "";
                 //string mayEnd = "";
-                while (forCache != "")
+                while (forCache.Length != 0)
                 {
                     if (forCache[0].ToString() == "(")
                     {
