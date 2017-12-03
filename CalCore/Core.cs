@@ -6,82 +6,114 @@ using System.Threading.Tasks;
 
 namespace CalCore
 {
-    public class Class1
+    public class Core
     {
-        public string lowCal(string math)
+        public string lowCal(string formula)
         {
-            try
+            string cache="";
+            double result = 0;
+            string _char;
+            int num = 0;
+
+            foreach (char each in formula)
             {
-                int symMath = 0;
-                if (math.Length == 0)//输入值为空，返回0
+                _char = each.ToString();
+                if (_char == "E")
                 {
-                    return "0";
+                    //cache += formula.Substring(0, 1);
+                    //formula = formula.Substring(2, formula.Length - 1);
+                    num = 1;
+                }
+                if (_char.IndexOfAny("+-".ToArray()) != -1 && cache != "" && num!=0)
+                {
+                    result += Convert.ToDouble(cache);
+                    cache = _char;
                 }
                 else
                 {
-                    if (math[0].ToString().IndexOfAny("+-".ToArray())==-1)//开头补符号
+                    cache += _char;
+                }
+                num--;
+            }
+            result += Convert.ToDouble(cache);
+            return result.ToString();
+        }
+
+        /*public string lowCal(string math)
+        {
+            //try
+            //{
+            int symMath = 0;
+            if (math == "")//输入值为空，返回0
+            {
+                return "0";
+            }
+            else
+            {
+                if (math.Substring(0, 1) != "+" && math.Substring(0, 1) != "-")//开头补符号
+                {
+                    math = "+" + math;
+                }
+                string mathCache = math;
+                while (mathCache != "")//检测数值个数
+                {
+                    if (mathCache.Substring(0, 1) == "+" || mathCache.Substring(0, 1) == "-")
                     {
-                        math = "+" + math;
+                        symMath++;
                     }
-                    string mathCache = math;
-                    while (mathCache.Length != 0)//检测数值个数
+                    mathCache = mathCache.Substring(1, mathCache.Length - 1);
+                }
+                double[] eachMath;//每个数值相加得结果
+                eachMath = new double[symMath];//初始化数组
+                mathCache = math;//将"草稿math"值进行抄写
+                string numNC = "";//数值暂储
+                int numAC = 0;//累计加减次数
+                string sym = "";//符号变量初始化
+                while (mathCache != "")//填充
+                {
+                    if (mathCache.Substring(0, 1) == "+" || mathCache.Substring(0, 1) == "-")
                     {
-                        if (mathCache[0].ToString().IndexOfAny("+-".ToArray())!=-1)
+                        if (sym == "")//符号
                         {
-                            symMath++;
-                        }
-                        mathCache = mathCache.Substring(1, mathCache.Length - 1);
-                    }
-                    double[] eachMath;//每个数值相加得结果
-                    eachMath = new double[symMath];//初始化数组
-                    mathCache = math;//将"草稿math"值进行抄写
-                    string numNC = "";//数值暂储
-                    int numAC = 0;//累计加减次数
-                    string sym = "";//符号变量初始化
-                    while (mathCache != "")//填充
-                    {
-                        if (mathCache[0].ToString().IndexOfAny("+-".ToArray()) != -1)
-                        {
-                            if (sym.Length == 0)//符号
-                            {
-                                sym = mathCache[0].ToString();
-                            }
-                            else
-                            {
-                                eachMath[numAC] = Convert.ToDouble(sym + numNC);
-                                numNC = "";
-                                numAC++;
-                                sym = mathCache[0].ToString();
-                            }
+                            sym = mathCache.Substring(0, 1);
                         }
                         else
                         {
-                            if (mathCache.Substring(0, 1) == "E")
-                            {
-                                numNC += mathCache.Substring(0, 1);
-                                mathCache = mathCache + "+0";
-                                mathCache = mathCache.Substring(1, mathCache.Length - 1);
-                            }
-                            numNC += mathCache[0].ToString();
+                            eachMath[numAC] = Convert.ToDouble(sym + numNC);
+                            numNC = "";
+                            numAC++;
+                            sym = mathCache.Substring(0, 1);
                         }
-                        mathCache = mathCache.Substring(1, mathCache.Length - 1);
                     }
-                    eachMath[numAC] = Convert.ToDouble(sym + numNC);
-
-                    //叠加所有数值
-                    double calCache = 0;
-                    for (int i = 0; i != symMath; i++)//有问题，暂留
+                    else
                     {
-                        calCache += eachMath[i];
+                        if (mathCache.Substring(0, 1) == "E")
+                        {
+                            numNC += mathCache.Substring(0, 1);
+                            mathCache = mathCache + "+0";
+                            mathCache = mathCache.Substring(1, mathCache.Length - 1);
+                        }
+                        numNC += mathCache.Substring(0, 1);
                     }
-                    return calCache.ToString();
+                    mathCache = mathCache.Substring(1, mathCache.Length - 1);
                 }
+                eachMath[numAC] = Convert.ToDouble(sym + numNC);
+
+                //叠加所有数值
+                double calCache = 0;
+                for (int i = 0; i != symMath; i++)//有问题，暂留
+                {
+                    calCache += eachMath[i];
+                }
+                return calCache.ToString();
             }
-            catch
+            //}
+            /*catch
             {
                 return "Error";//返回报告未知错误
             }
-        }
+        }*/
+
 
         public string Multiply(string formula,bool calpow)
         {
@@ -89,7 +121,7 @@ namespace CalCore
             {
                 formula = calPow(formula);
             }
-            try
+            //try
             {
                 ////////////////检测开头有没有符号，没有就加上
                 if (formula[0].ToString().IndexOfAny("+-".ToArray()) ==-1)
@@ -100,13 +132,27 @@ namespace CalCore
                 ///////////////记乘除号
                 string formulaTry = formula;
                 int mulNum = 0;//乘除号个数
-                while (formulaTry.Length != 0)
+
+                string LastChar="";
+                int GroupNumber = 0;
+                foreach(char c in formula)//formula里的每个字符
                 {
-                    if (formulaTry[0].ToString().IndexOfAny("*/".ToArray())!=-1)
+                    if (c.ToString().IndexOfAny("*/+-".ToArray()) != -1)
                     {
-                        mulNum++;
+                        GroupNumber++;
+                        if (c.ToString().IndexOfAny("*/".ToArray()) != -1)
+                        {
+                            mulNum++;
+                        }
                     }
-                    formulaTry = formulaTry.Substring(1, formulaTry.Length - 1);
+                    else
+                    {
+                        if(LastChar.ToString().IndexOfAny("*/+-".ToArray()) != -1)
+                        {
+                            GroupNumber++;
+                        }
+                    }
+                    LastChar = c.ToString();
                 }
                 int mulN = mulNum;//后面乘除法做准备
 
@@ -116,7 +162,7 @@ namespace CalCore
                 [+12],[+23],[*](标记),[+34],[-45],[/](标记),[-56]
                 */
                 string[] grp;//组
-                grp = new string[99999];//上限，99999个数组
+                grp = new string[GroupNumber];//上限，99999个数组
                 int[] muNum;//乘除号所在组号
                 muNum = new int[mulNum];
                 formulaTry = formula;//算式的备份
@@ -186,9 +232,9 @@ namespace CalCore
                 }
                 return lowCal(grp[gn]);
             }
-            catch
+            //catch
             {
-                return "Error";
+                //return "Error";
             }
         }
 
@@ -283,8 +329,8 @@ namespace CalCore
 
         public string adCal(string formula)
         {
-            try
-            {
+            //try
+            //{
                 string forCache = formula;//备份变量
 
                 /*int Knum = 0;//括号对数
@@ -302,7 +348,7 @@ namespace CalCore
                 string cache1, cache2 = "";
                 while (mube!=formula.Length)
                 {
-                    try
+                    //try
                     {
                         if (forCache.Substring(mube, 1) == "(" && forCache.Substring(mube-1,1)!="*")
                         {
@@ -312,7 +358,7 @@ namespace CalCore
                             forCache = formula;
                         }
                     }
-                    catch{}
+                    //catch{}
                     mube++;
                 }
                 ////////////////////////////
@@ -354,11 +400,11 @@ namespace CalCore
                     }
                 }
                 return Multiply(formula,true);
-            }
+            /*}
             catch
             {
                 return "Error";
-            }
+            }*/
         }
     }
 }

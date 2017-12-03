@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using CalCore;
 
 namespace calCore_Demo
 {
@@ -19,7 +20,7 @@ namespace calCore_Demo
 
         private void button1_Click(object sender, EventArgs e)
         {
-            CalCore.Class1 cl = new CalCore.Class1();
+            Core cl = new Core();
             textBox2.Text = cl.adCal(textBox1.Text);
         }
 
