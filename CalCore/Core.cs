@@ -8,16 +8,16 @@ namespace CalCore
 {
     public class Core
     {
-        public string lowCal(string formula)
+        public string lowCal(string formula)//循环*1
         {
             string cache = "";
             double result = 0;
             string _char;
             int num = 0;
 
-            foreach (char each in formula)
+            foreach (char each in formula)//遍历算式中的每个字符
             {
-                _char = each.ToString();
+                _char = each.ToString();//格式化
                 if (_char == "E")
                 {
                     //cache += formula.Substring(0, 1);
@@ -41,7 +41,7 @@ namespace CalCore
 
         public string Multiply(string formula, bool calpow)
         {
-            if (calpow == true)
+            if (calpow == true)//是否计算平方
             {
                 formula = calPow(formula);
             }
@@ -57,19 +57,19 @@ namespace CalCore
 
             string LastChar = "";
             int GroupNumber = 0;
-            foreach (char c in formula)//formula里的每个字符
+            foreach (char c in formula)//遍历formula里的每个字符
             {
-                if (c.ToString().IndexOfAny("*/+-".ToArray()) != -1)
+                if (c.ToString().IndexOfAny("*/+-".ToArray()) != -1)//如果是+-*/
                 {
                     GroupNumber++;
-                    if (c.ToString().IndexOfAny("*/".ToArray()) != -1)
+                    if (c.ToString().IndexOfAny("*/".ToArray()) != -1)//如果是*/
                     {
                         mulNum++;
                     }
                 }
                 else
                 {
-                    if (LastChar.ToString().IndexOfAny("*/+-".ToArray()) != -1)
+                    if (LastChar.ToString().IndexOfAny("*/+-".ToArray()) != -1)//如果上一个字符是+-*/
                     {
                         GroupNumber++;
                     }
@@ -210,17 +210,17 @@ namespace CalCore
         private string calMu(string fir, string sym, string sec)
         {
             string res = "";
-            if (sym == "*")
+            if (sym == "*")//乘号
             {
                 res = (Convert.ToDouble(fir) * Convert.ToDouble(sec)).ToString();
             }
             else
             {
-                if (sym == "/")
+                if (sym == "/")//除号
                 {
                     res = (Convert.ToDouble(fir) / Convert.ToDouble(sec)).ToString();
                 }
-                else
+                else//再没有就是次方
                 {
                     res = Math.Pow(Convert.ToDouble(fir), Convert.ToDouble(sec)).ToString();
                 }
