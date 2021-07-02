@@ -1,61 +1,25 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.InteropServices.ComTypes;
 
-namespace CalCore
+namespace CalCoreLab
 {
-    public class Core
+    class Program
     {
-        public string Calculate(string formula)//总体计算【总入口】
+        //"+12+23*34*1-45/-5"
+        //"1+((1+2)+(1+2))+(2+3)"
+        static string formula = "1+1+1+3-2";
+        static void Main(string[] args)
         {
-            //检测有无括号
-            if (formula.IndexOf("(") != -1)
-            {
-                //有括号
-                formula = RemoveBrackets(formula);//移除括号
-            }
-            if (formula.IndexOf("*") != -1)
-            {
-                //涉及乘法
-                formula = MultiplyToPlus(formula);
-            }
-            return lowCal(formula);//进行最后的加减法
-        }
-        public string lowCal(string formula)//循环*1
-        {
-            string cache = "";
-            double result = 0;
-            string _char;
-            int num = 0;
-
-            foreach (char each in formula)//遍历算式中的每个字符
-            {
-                _char = each.ToString();//格式化
-                if (_char == "E")
-                {
-                    //cache += formula.Substring(0, 1);
-                    //formula = formula.Substring(2, formula.Length - 1);
-                    num = 1;
-                }
-                if (_char.IndexOfAny("+-".ToArray()) != -1 && cache != "" && num != 0)
-                {
-                    result += Convert.ToDouble(cache);
-                    cache = _char;
-                }
-                else
-                {
-                    cache += _char;
-                }
-                num--;
-            }
-            result += Convert.ToDouble(cache);
-            return result.ToString();
+            //string result = MultiplyClassify(formula);
+            //Console.WriteLine(result);
+            Console.WriteLine(MultiplyToPlus(formula));
+            Console.ReadLine();
         }
 
-        string MultiplyToPlus(string formula)//乘法级别的分类【乘除法→加法】(无判断是否需要处理）
+        static string MultiplyToPlus(string formula)//乘法级别的分类【乘除法→加法】(无判断是否需要处理）
         {
             List<string> formulaBlocks = new List<string>();
             string formulaBlocksCache = "";
@@ -87,7 +51,7 @@ namespace CalCore
 
             formulaBlocks.Add(formulaBlocksCache);//保存最后一FormulaBlock
 
-            //DebugList(formulaBlocks);
+            DebugList(formulaBlocks);
 
             for (int i = 0; i < formulaBlocks.Count; i++)//处理乘除号
             {
@@ -146,7 +110,7 @@ namespace CalCore
             return List2String(formulaBlocks);
         }
 
-        string RemoveBrackets(string formula)//移除括号(无判断是否需要处理)
+        static string RemoveBrackets(string formula)//(无判断是否需要处理)
         {
             while (formula.IndexOfAny("(".ToCharArray()) != -1)//如果存在括号
             {
@@ -177,7 +141,7 @@ namespace CalCore
             return formula;
         }
 
-        public string List2String(List<string> list)
+        public static string List2String(List<string> list)
         {
             string result = "";
             foreach (string str in list)
@@ -187,7 +151,8 @@ namespace CalCore
             return result;
         }
 
-        private void DebugList(List<string> list)//Debug专用
+
+        private static void DebugList(List<string> list)
         {
             //PASS
             foreach (string str in list)
@@ -196,6 +161,37 @@ namespace CalCore
             }
             Console.WriteLine("DEBUG ENDED");
 
+        }
+
+        private static string lowCal(string formula)//循环*1
+        {
+            string cache = "";
+            double result = 0;
+            string _char;
+            int num = 0;
+
+            foreach (char each in formula)//遍历算式中的每个字符
+            {
+                _char = each.ToString();//格式化
+                if (_char == "E")
+                {
+                    //cache += formula.Substring(0, 1);
+                    //formula = formula.Substring(2, formula.Length - 1);
+                    num = 1;
+                }
+                if (_char.IndexOfAny("+-".ToArray()) != -1 && cache != "" && num != 0)
+                {
+                    result += Convert.ToDouble(cache);
+                    cache = _char;
+                }
+                else
+                {
+                    cache += _char;
+                }
+                num--;
+            }
+            result += Convert.ToDouble(cache);
+            return result.ToString();
         }
 
     }

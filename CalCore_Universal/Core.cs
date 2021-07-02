@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace CalCore
+namespace CalCore_Universal
 {
-    public class Core
+    public class CalCore
     {
         public string Calculate(string formula)//总体计算【总入口】
         {
@@ -199,4 +196,5 @@ namespace CalCore
         }
 
     }
+
 }
