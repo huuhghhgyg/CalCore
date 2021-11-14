@@ -28,26 +28,24 @@ namespace CalCore
         {
             string cache = "";
             double result = 0;
-            string _char;
             int num = 0;
 
             foreach (char each in formula)//遍历算式中的每个字符
             {
-                _char = each.ToString();//格式化
-                if (_char == "E")
+                if (each == 'E')
                 {
                     //cache += formula.Substring(0, 1);
                     //formula = formula.Substring(2, formula.Length - 1);
                     num = 1;
                 }
-                if (_char.IndexOfAny("+-".ToArray()) != -1 && cache != "" && num != 0)
+                if ((each=='+' || each=='-') && cache != "" && num != 0)
                 {
                     result += Convert.ToDouble(cache);
-                    cache = _char;
+                    cache = each.ToString();
                 }
                 else
                 {
-                    cache += _char;
+                    cache += each;
                 }
                 num--;
             }
@@ -61,7 +59,7 @@ namespace CalCore
             string formulaBlocksCache = "";
             foreach (char letter in formula)
             {
-                if (letter.ToString().IndexOfAny("+-".ToArray()) != -1)//是+-
+                if (letter=='+'||letter=='-')//是+-
                 {
                     if (formulaBlocksCache != "")//cache不为空【】
                     {
@@ -159,7 +157,7 @@ namespace CalCore
                     string detectString = formula.Substring(leftBraketLocation, detedctorLocation - leftBraketLocation);
                     foreach (char c in detectString)
                     {
-                        if (c.ToString() == ")")
+                        if (c == ')')
                         {
                             break;
                         }

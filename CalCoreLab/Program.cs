@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 
+
 namespace CalCoreLab
 {
     class Program
@@ -11,15 +12,16 @@ namespace CalCoreLab
         //"+12+23*34*1-45/-5"
         //"1+((1+2)+(1+2))+(2+3)"
         static string formula = "1+1+1+3-2";
-        static void Main(string[] args)
+        void Main(string[] args)
         {
             //string result = MultiplyClassify(formula);
             //Console.WriteLine(result);
             Console.WriteLine(MultiplyToPlus(formula));
             Console.ReadLine();
+            Console.WriteLine();
         }
 
-        static string MultiplyToPlus(string formula)//乘法级别的分类【乘除法→加法】(无判断是否需要处理）
+        string MultiplyToPlus(string formula)//乘法级别的分类【乘除法→加法】(无判断是否需要处理）
         {
             List<string> formulaBlocks = new List<string>();
             string formulaBlocksCache = "";
@@ -110,7 +112,7 @@ namespace CalCoreLab
             return List2String(formulaBlocks);
         }
 
-        static string RemoveBrackets(string formula)//(无判断是否需要处理)
+        string RemoveBrackets(string formula)//(无判断是否需要处理)
         {
             while (formula.IndexOfAny("(".ToCharArray()) != -1)//如果存在括号
             {
@@ -141,7 +143,7 @@ namespace CalCoreLab
             return formula;
         }
 
-        public static string List2String(List<string> list)
+        public string List2String(List<string> list)
         {
             string result = "";
             foreach (string str in list)
@@ -152,7 +154,7 @@ namespace CalCoreLab
         }
 
 
-        private static void DebugList(List<string> list)
+        private void DebugList(List<string> list)
         {
             //PASS
             foreach (string str in list)
@@ -163,7 +165,7 @@ namespace CalCoreLab
 
         }
 
-        private static string lowCal(string formula)//循环*1
+        private string lowCal(string formula)//循环*1
         {
             string cache = "";
             double result = 0;
