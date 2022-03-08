@@ -200,26 +200,5 @@ namespace CalCore
             return formula;
         }
 
-        private static string List2String(List<string> list)
-        {
-            string result = "";
-            foreach (string str in list)
-            {
-                result += str;
-            }
-            return result;
-        }
-
-        private void DebugList(List<string> list)//Debug专用
-        {
-            //PASS
-            foreach (string str in list)
-            {
-                Console.WriteLine(str);
-            }
-            Console.WriteLine("DEBUG ENDED");
-
-        }
-
     }
 }
