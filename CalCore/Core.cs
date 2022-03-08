@@ -9,7 +9,7 @@ namespace CalCore
 {
     public class Core
     {
-        public string Calculate(string formula)//总体计算【总入口】
+        public static string Calculate(string formula)//总体计算【总入口】
         {
             //检测有无括号
             if (formula.IndexOf("(") != -1)
@@ -22,38 +22,48 @@ namespace CalCore
                 //涉及乘法
                 formula = MultiplyToPlus(formula);
             }
-            return lowCal(formula);//进行最后的加减法
+            return lowCal(formula);//进行最后的加减法运算
         }
-        public string lowCal(string formula)//循环*1
+        private static string lowCal(string formula)
         {
-            string cache = "";
-            double result = 0;
-            int num = 0;
+            /* 对算式进行加法运算
+             * 输入的算式如 formula = -12+34+-56-78+90
+             * 将算式中多余（重复）的运算符删除，得到
+             * formula如 -12+34-56-78+90
+             * 
+             * 注意：
+             * 如果有科学计数法，应该在本步骤前做完
+            */
 
-            foreach (char each in formula)//遍历算式中的每个字符
+            decimal result = 0; // 初始化结果
+
+            if (formula[0] != '+' && formula[0] != '-') formula.Insert(0, "+");// 补齐开头符号
+
+            // 替换重复的运算符
+            formula = formula.Replace("+-", "-");
+            formula = formula.Replace("-+", "-");
+
+            string figureCache = "0"; // 初始化存放数字的缓存变量(如存放+23或者-30)
+            foreach (char c in formula)
             {
-                if (each == 'E')
+                if (c == '+' || c == '-')
                 {
-                    //cache += formula.Substring(0, 1);
-                    //formula = formula.Substring(2, formula.Length - 1);
-                    num = 1;
-                }
-                if ((each=='+' || each=='-') && cache != "" && num != 0)
-                {
-                    result += Convert.ToDouble(cache);
-                    cache = each.ToString();
+                    // 是加减号
+                    result += Convert.ToDecimal(figureCache); //将上一个变量输入结果
+                    figureCache = c.ToString(); // 首字符换成符号
                 }
                 else
                 {
-                    cache += each;
+                    // 不是加减号
+                    figureCache += c; // 继续添加数字
                 }
-                num--;
             }
-            result += Convert.ToDouble(cache);
+            result += Convert.ToDecimal(figureCache); //最后一个变量输入结果
+
             return result.ToString();
         }
 
-        string MultiplyToPlus(string formula)//乘法级别的分类【乘除法→加法】(无判断是否需要处理）
+        private static string MultiplyToPlus(string formula)//乘法级别的分类【乘除法→加法】(无判断是否需要处理）
         {
             List<string> formulaBlocks = new List<string>();
             string formulaBlocksCache = "";
@@ -144,7 +154,7 @@ namespace CalCore
             return List2String(formulaBlocks);
         }
 
-        string RemoveBrackets(string formula)//移除括号(无判断是否需要处理)
+        private static string RemoveBrackets(string formula)//移除括号(无判断是否需要处理)
         {
             while (formula.IndexOfAny("(".ToCharArray()) != -1)//如果存在括号
             {
@@ -175,7 +185,7 @@ namespace CalCore
             return formula;
         }
 
-        public string List2String(List<string> list)
+        private static string List2String(List<string> list)
         {
             string result = "";
             foreach (string str in list)
