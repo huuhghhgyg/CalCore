@@ -5,8 +5,6 @@ using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using CalCore;
 
-
-
 namespace CalCoreLab
 {
     class Program
