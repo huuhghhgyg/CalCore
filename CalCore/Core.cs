@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace CalCore
 {
@@ -63,95 +64,114 @@ namespace CalCore
             return result.ToString();
         }
 
-        private static string MultiplyToPlus(string formula)//乘法级别的分类【乘除法→加法】(无判断是否需要处理）
+        private static string MultiplyToPlus(string formula) //乘除法级别处理【乘除法→加法】(无判断是否需要其它处理）
         {
-            List<string> formulaBlocks = new List<string>();
-            string formulaBlocksCache = "";
-            foreach (char letter in formula)
+            /* 对算式中的乘除法进行处理（替换）
+             * 假设预处理后输入的formula为：
+             * formula = 1+2*3+4/5*6-7+8*9
+             * 进行分割  1,2*3,4/5*6,7,8*9
+             * 查看算式块中有没有乘除运算符，没有的直接设为“”，有的进行计算，存入新List
+             * 结果与原formula中的对应算式替换
+             * 
+             * 注意：
+             * 匹配乘法算式的正则表达式：(\+|-|)(\d+\.?\d*|\d*\.?\d+)((\*|/)(\+|-|)(\d+\.?\d*|\d*\.?\d+))+
+             * 其中，实数的正则表达式为：(\d+\.?\d*|\d*\.?\d+)
+             * ※ 是否需要使用StringBuilder?
+             */
+
+            // 算式预处理
+            formula = formula.TrimStart('+', '-'); // 将头部的加减运算符去掉，以免干扰算式分块
+
+            // 正则表达式匹配
+            string regexFormula = @"(\+|-|)(\d+\.?\d*|\d*\.?\d+)((\*|/)(\+|-|)(\d+\.?\d*|\d*\.?\d+))+";
+            var matchedFormulas = Regex.Matches(formula,regexFormula);
+
+            string[] formulaBlocks = new string[matchedFormulas.Count]; // 创建已知大小的算式数组
+            string[] processBlocks = new string[matchedFormulas.Count]; // 声明结果数组，大小与算式数组相同
+
+            for (int i = 0; i < matchedFormulas.Count; i++)
             {
-                if (letter=='+'||letter=='-')//是+-
+                formulaBlocks[i] = matchedFormulas[i].Value;
+            }
+
+            formulaBlocks.CopyTo(processBlocks, 0); // 复制算式数组的值到结果数组
+
+            for (int i = 0; i < processBlocks.Length; i++)
+            {
+                processBlocks[i] = CalMultiply(processBlocks[i]); // 计算算式值
+            }
+
+            for (int i = 0; i < formulaBlocks.Length; i++)
+            {
+                formula = formula.Replace(formulaBlocks[i], processBlocks[i]);
+            }
+
+            return formula;
+        }
+
+        private static string CalMultiply(string formula) //计算乘除法【只有乘除法的算式】
+        {
+            /* 用于计算仅含有乘除法的算式，如
+             * 3*4/5*6
+             */
+            string figure = "";
+            char sym = ' '; // 临时存放符号
+            decimal result=0;
+
+            for (int i = 0; i < formula.Length; i++)
+            {
+                if (sym == ' ') // 无符号
                 {
-                    if (formulaBlocksCache != "")//cache不为空【】
+                    if (formula[i] != '*' && formula[i] != '/')
+                        figure+=formula[i]; // 字符不是符号，填入数字
+                    else
                     {
-                        formulaBlocks.Add(formulaBlocksCache);//添加内容
+                        result = Convert.ToDecimal(figure); // 字符是符号，结果基底填入数字
+                        figure = ""; // 清空figure的缓存
+                        sym = formula[i]; // 得到第一个符号
                     }
-                    formulaBlocksCache = letter.ToString();//改成+-
-                }
-                else if (letter.ToString().IndexOfAny("*/".ToArray()) != -1)
-                {//乘除号
-                    formulaBlocksCache += letter.ToString();
-                    formulaBlocks.Add(formulaBlocksCache);//添加内容
-                    formulaBlocksCache = "";
                 }
                 else
                 {
-                    if (formulaBlocksCache == "") //为空【】2
+                    // 已经有符号
+                    if ((formula[i] == '*') || (formula[i] == '/'))
                     {
-                        formulaBlocksCache = "+";
-                    }
-                    formulaBlocksCache += letter.ToString();//数字或加减号【+2】3
-                }
-            }
-
-            formulaBlocks.Add(formulaBlocksCache);//保存最后一FormulaBlock
-
-            //DebugList(formulaBlocks);
-
-            for (int i = 0; i < formulaBlocks.Count; i++)//处理乘除号
-            {
-                string block = formulaBlocks[i];
-                if (block.EndsWith("*") || block.EndsWith("/"))//+33* -66
-                {
-                    int index = formulaBlocks.IndexOf(block);//找到block的指针位置
-                    string symbol = block.Substring(block.Length - 1, 1);
-                    string result;
-                    bool again = false;//连乘或除
-
-                    if (symbol == "*")
-                    {
-                        string nextItem = formulaBlocks[index + 1];//下一项
-                        if (nextItem.EndsWith("*"))
-                        {//下一项也是乘法
-                            result = (double.Parse(block.Substring(0, block.Length - 1))
-                            * double.Parse(nextItem.Substring(0, nextItem.Length - 1))).ToString() + "*";
-                            again = true;
+                        // 是符号
+                        switch(sym) // 结算旧符号
+                        {
+                            case '*':
+                                result *= Convert.ToDecimal(figure); // 执行乘法
+                                break;
+                            case '/':
+                                result /= Convert.ToDecimal(figure); // 执行除法
+                                break;
                         }
-                        else
-                        {//普通计算乘法
-                            result = (double.Parse(block.Substring(0, block.Length - 1))
-                                    * double.Parse(nextItem)).ToString();
-                        }
+                        figure = ""; // 清空figure的缓存
+                        sym= formula[i]; // 填入新符号
                     }
                     else
                     {
-                        string nextItem = formulaBlocks[index + 1];//下一项
-                        if (nextItem.EndsWith("/"))
-                        {//下一项也是除法
-                            result = (double.Parse(block.Substring(0, block.Length - 1))
-                                                        / double.Parse(nextItem.Substring(0, nextItem.Length - 1))).ToString() + "*";
-                            again = true;
-                        }
-                        else
-                        {//普通计算除法
-                            result = (double.Parse(block.Substring(0, block.Length - 1))
-                                    / double.Parse(formulaBlocks[index + 1])).ToString();
-                        }
-                    }
-
-                    if (!result.StartsWith("-"))//修饰开头
-                    {
-                        result = "+" + result;
-                    }
-
-                    formulaBlocks[index + 1] = result;
-                    formulaBlocks.Remove(block);
-                    if (again == true)
-                    {
-                        i--;
+                        // 不是符号
+                        figure+=formula[i];
                     }
                 }
             }
-            return List2String(formulaBlocks);
+
+            // 遍历结束，收尾工作
+            switch (sym) // 结算旧符号
+            {
+                case '*':
+                    result *= Convert.ToDecimal(figure); // 执行乘法
+                    break;
+                case '/':
+                    result /= Convert.ToDecimal(figure); // 执行除法
+                    break;
+            }
+
+            if (result > 0)
+                return '+' + result.ToString(); // 结果为正数，末尾加0
+            else
+                return result.ToString(); // 结果为负数，末尾不加0
         }
 
         private static string RemoveBrackets(string formula)//移除括号(无判断是否需要处理)

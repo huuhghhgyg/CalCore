@@ -13,7 +13,7 @@ namespace CalCoreLab
     {
         //"+12+23*34*1-45/-5"
         //"1+((1+2)+(1+2))+(2+3)"
-        static string formula = "1+1+1+3+-2";
+        static string formula = "+1+2*3+4/5*6-7+8*9+100*0.1*-1*-1*-10*-0.1";
         static void Main(string[] args)
         {
             string result = CalCore.Core.Calculate(formula);
