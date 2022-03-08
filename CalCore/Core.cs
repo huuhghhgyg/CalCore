@@ -25,6 +25,15 @@ namespace CalCore
             }
             return lowCal(formula);//进行最后的加减法运算
         }
+        private static string calUnderMultiply(string formula) // 返回乘法及以下的结果
+        {
+            if (formula.IndexOf("*") != -1)
+            {
+                //涉及乘法
+                formula = MultiplyToPlus(formula);
+            }
+            return lowCal(formula);//进行最后的加减法运算
+        }
         private static string lowCal(string formula)
         {
             /* 对算式进行加法运算
@@ -174,33 +183,19 @@ namespace CalCore
                 return result.ToString(); // 结果为负数，末尾不加0
         }
 
-        private static string RemoveBrackets(string formula)//移除括号(无判断是否需要处理)
+        private static string RemoveBrackets(string formula) // 移除括号(无判断是否需要处理)
         {
-            while (formula.IndexOfAny("(".ToCharArray()) != -1)//如果存在括号
+            while (formula.IndexOfAny("(".ToCharArray()) != -1) // 如果存在括号
             {
-                int leftBraketLocation = formula.LastIndexOf("(");
-                int detedctorLocation;
+                int leftBraketLocation = formula.LastIndexOf("("); // 找到最后一个左括号的坐标
                 while (formula.LastIndexOf("(") == leftBraketLocation)
                 {
-                    detedctorLocation = formula.LastIndexOf(")");
-                    int stepRecorder = 0;
-                    string detectString = formula.Substring(leftBraketLocation, detedctorLocation - leftBraketLocation);
-                    foreach (char c in detectString)
-                    {
-                        if (c == ')')
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            stepRecorder++;
-                        }
-                    }
-                    detedctorLocation = leftBraketLocation + stepRecorder + 1;
-                    string block = formula.Substring(leftBraketLocation, detedctorLocation - leftBraketLocation);
-                    formula = formula.Replace(block, lowCal(block.Substring(1, block.Length - 2)));
+                    string formulaRemain = formula.Substring(leftBraketLocation);
+                    int firstRightBraket=formulaRemain.IndexOf(")");
+                    int rightBracketLocation=firstRightBraket+1;
+                    string blockBracket = formula.Substring(leftBraketLocation, rightBracketLocation);
+                    formula = formula.Replace(blockBracket, calUnderMultiply(blockBracket.Trim('(', ')')));
                 }
-                //Console.WriteLine(formula);
             }
             return formula;
         }
