@@ -9,14 +9,30 @@ namespace CalCoreLab
 {
     class Program
     {
-        //"+12+23*34*1-45/-5"
-        //"1+((1+2)+(1+2))+(2+3)"
-        //static string formula = "+1+2*3+4/5*6-7+8*9+100*0.1*-1*-1*-10*-0.1";
-        static string formula = "4+(((1+2)*3)+(4*(2+2*(1+2)*2)*2+3)-10)*3+5*((1+2*2)*2+3)*2";
         static void Main(string[] args)
         {
-            string result = CalCore.Core.Calculate(formula);
-            Console.WriteLine(result);
+            //string result = CalCore.Core.Calculate(formula);
+
+            Matrix mt1 = new Matrix(new double[,] { { 1, 2, 3 }, { 4, 5, 6 } });
+            Matrix mt2 = new Matrix(new double[,] { { 2, 1 }, { 3, 2 }, { 2, 4 } });
+
+            Console.WriteLine($"{mt1.ValueString}\n");
+            Console.WriteLine($"{mt2.ValueString}\n");
+
+            Console.WriteLine($"{(mt1*mt2).ValueString}\n");
+            //mt1.T();
+            Console.WriteLine($"{mt1.T().ValueString}\n");
+
+            Console.WriteLine($"{mt1.T().ValueString}\n");
+            Console.WriteLine($"{mt1.GetSubMatrix(1, 1, 2, 2).ValueString}\n");
+            Console.WriteLine($"{mt1.GetCols(2, 2).ValueString}\n"); //截取列
+            Console.WriteLine($"{mt1.GetCol(2).ValueString}\n"); //截取列
+            Console.WriteLine($"{mt1.GetValue(1,2)}\n");
+
+            //Console.WriteLine($"{(mt1-mt2).ValueString}\n");
+            //Console.WriteLine($"{mt1.ValueString}\n");
+            //Console.WriteLine($"{(6.2-mt1).ValueString}\n");
+
             Console.WriteLine();
         }
     }

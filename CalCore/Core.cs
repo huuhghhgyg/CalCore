@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Text;
-using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 
 namespace CalCore
@@ -93,7 +91,7 @@ namespace CalCore
 
             // 正则表达式匹配
             string regexFormula = @"(\+|-|)(\d+\.?\d*|\d*\.?\d+)((\*|/)(\+|-|)(\d+\.?\d*|\d*\.?\d+))+";
-            var matchedFormulas = Regex.Matches(formula,regexFormula);
+            var matchedFormulas = Regex.Matches(formula, regexFormula);
 
             string[] formulaBlocks = new string[matchedFormulas.Count]; // 创建已知大小的算式数组
             string[] processBlocks = new string[matchedFormulas.Count]; // 声明结果数组，大小与算式数组相同
@@ -125,14 +123,14 @@ namespace CalCore
              */
             string figure = "";
             char sym = ' '; // 临时存放符号
-            decimal result=0;
+            decimal result = 0;
 
             for (int i = 0; i < formula.Length; i++)
             {
                 if (sym == ' ') // 无符号
                 {
                     if (formula[i] != '*' && formula[i] != '/')
-                        figure+=formula[i]; // 字符不是符号，填入数字
+                        figure += formula[i]; // 字符不是符号，填入数字
                     else
                     {
                         result = Convert.ToDecimal(figure); // 字符是符号，结果基底填入数字
@@ -146,7 +144,7 @@ namespace CalCore
                     if ((formula[i] == '*') || (formula[i] == '/'))
                     {
                         // 是符号
-                        switch(sym) // 结算旧符号
+                        switch (sym) // 结算旧符号
                         {
                             case '*':
                                 result *= Convert.ToDecimal(figure); // 执行乘法
@@ -156,12 +154,12 @@ namespace CalCore
                                 break;
                         }
                         figure = ""; // 清空figure的缓存
-                        sym= formula[i]; // 填入新符号
+                        sym = formula[i]; // 填入新符号
                     }
                     else
                     {
                         // 不是符号
-                        figure+=formula[i];
+                        figure += formula[i];
                     }
                 }
             }
@@ -191,8 +189,8 @@ namespace CalCore
                 while (formula.LastIndexOf("(") == leftBraketLocation)
                 {
                     string formulaRemain = formula.Substring(leftBraketLocation);
-                    int firstRightBraket=formulaRemain.IndexOf(")");
-                    int rightBracketLocation=firstRightBraket+1;
+                    int firstRightBraket = formulaRemain.IndexOf(")");
+                    int rightBracketLocation = firstRightBraket + 1;
                     string blockBracket = formula.Substring(leftBraketLocation, rightBracketLocation);
                     formula = formula.Replace(blockBracket, calUnderMultiply(blockBracket.Trim('(', ')')));
                 }
