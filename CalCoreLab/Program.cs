@@ -19,7 +19,7 @@ namespace CalCoreLab
             Console.WriteLine($"{mt1.ValueString}\n");
             Console.WriteLine($"{mt2.ValueString}\n");
 
-            Console.WriteLine($"{(mt1*mt2).ValueString}\n");
+            Console.WriteLine($"{(mt1 * mt2).ValueString}\n");
             //mt1.T();
             Console.WriteLine($"{mt1.T().ValueString}\n");
 
@@ -27,12 +27,13 @@ namespace CalCoreLab
             Console.WriteLine($"{mt1.GetSubMatrix(1, 1, 2, 2).ValueString}\n");
             Console.WriteLine($"{mt1.GetCols(2, 2).ValueString}\n"); //截取列
             Console.WriteLine($"{mt1.GetCol(2).ValueString}\n"); //截取列
-            Console.WriteLine($"{mt1.GetValue(1,2)}\n");
+            Console.WriteLine($"{mt1.GetValue(1, 2)}\n");
 
             //Console.WriteLine($"{(mt1-mt2).ValueString}\n");
             //Console.WriteLine($"{mt1.ValueString}\n");
             //Console.WriteLine($"{(6.2-mt1).ValueString}\n");
 
+            Console.WriteLine($"{3 == new Inf()}");
             Console.WriteLine();
         }
     }
