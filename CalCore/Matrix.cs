@@ -8,31 +8,6 @@ using System.Threading.Tasks;
 
 namespace CalCore
 {
-    public class Inf
-    {
-        //由于会自动提升，所以只用比较double
-        public static bool operator <(Inf inf, double n) => false;
-        public static bool operator <(double n, Inf inf) => true;
-        public static bool operator <(Inf inf1, Inf inf2) => false;
-        public static bool operator >(Inf inf, double n) => true;
-        public static bool operator >(double n, Inf inf) => false;
-        public static bool operator >(Inf inf1, Inf inf2) => false;
-        public static bool operator <=(Inf inf, double n) => false;
-        public static bool operator <=(double n, Inf inf) => true;
-        public static bool operator <=(Inf inf1, Inf inf2) => false;
-        public static bool operator >=(Inf inf, double n) => true;
-        public static bool operator >=(double n, Inf inf) => false;
-        public static bool operator >=(Inf inf1, Inf inf2) => false;
-        public static bool operator ==(Inf inf, double n) => false;
-        public static bool operator ==(double n, Inf inf) => false;
-        public static bool operator ==(Inf inf1, Inf inf2) => true;
-        public static bool operator !=(Inf inf, double n) => true;
-        public static bool operator !=(double n, Inf inf) => true;
-        public static bool operator !=(Inf inf1, Inf inf2) => false;
-        public override bool Equals(Object obj) => obj is Inf;
-        public override int GetHashCode() => 0;
-    }
-
     public class Matrix
     {
         public Matrix(int n, int m) //创建一个n行m列的矩阵
@@ -141,6 +116,7 @@ namespace CalCore
         #endregion
 
         #region
+        public override string ToString() => ValueString; //习惯使用的函数
         public Matrix T() //矩阵转置（步骤）
         {
             Matrix result = new Matrix(Col, Row);
