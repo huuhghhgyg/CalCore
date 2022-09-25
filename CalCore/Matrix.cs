@@ -10,18 +10,37 @@ namespace CalCore
 {
     public class Matrix
     {
+        /// <summary>
+        /// 通过指定矩阵的行数和列数创建矩阵对象
+        /// </summary>
+        /// <param name="n">矩阵的行数</param>
+        /// <param name="m">矩阵的列数</param>
         public Matrix(int n, int m) //创建一个n行m列的矩阵
         {
             Value = new double[n, m];
         }
+
+        /// <summary>
+        /// 通过输入二维数组创建矩阵对象
+        /// </summary>
+        /// <param name="value">矩阵数值的二维数组</param>
         public Matrix(double[,] value)
         {
             Value = value;
         }
 
-        public double[,] Value { get; set; } //存储矩阵的值
-        public int Row { get => Value.GetLength(0); } //行数
-        public int Col { get => Value.GetLength(1); } //列数
+        /// <summary>
+        /// 矩阵中存储的数值，为二维数组
+        /// </summary>
+        public double[,] Value { get; set; }
+        /// <summary>
+        /// 矩阵的行数
+        /// </summary>
+        public int Row { get => Value.GetLength(0); }
+        /// <summary>
+        /// 矩阵的列数
+        /// </summary>
+        public int Col { get => Value.GetLength(1); }
 
         #region 属性
         /// <summary>
@@ -187,6 +206,7 @@ namespace CalCore
             }
             else throw new ArgumentOutOfRangeException("参照元素位置不存在于矩阵内");
         }
+
         //此处其实可以引用GetSubMatrix，但是出于执行代码量考虑就重新写了
         /// <summary>
         /// 从输入的矩阵中截取多行
