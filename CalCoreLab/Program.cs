@@ -48,8 +48,9 @@ namespace CalCoreLab
                 {5,inf,inf,inf,0,3},
                 {inf,inf,3,3,inf,0}
             });
-            Console.WriteLine(Network.ShortestPath2AllPoints(pathMatrix).ToString()+"\n");
-            Console.WriteLine(Network.ShortestPath2LastPoint(pathMatrix).ToString()+"\n");
+            Console.WriteLine(Network.ShortestPath2AllPoints(pathMatrix).ToString() + "\n");
+            Console.WriteLine(Network.ShortestPath2LastPoint(pathMatrix).ToString() + "\n");
+            Console.WriteLine(pathMatrix.Min + "\n");
         }
     }
 }

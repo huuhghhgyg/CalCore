@@ -24,7 +24,10 @@ namespace CalCore
         public int Col { get => Value.GetLength(1); } //列数
 
         #region 属性
-        public string ValueString //返回矩阵String值 [1 2 3]\n[4 5 6]
+        /// <summary>
+        /// 将矩阵以String形式输出
+        /// </summary>
+        public string ValueString
         {
             get
             {
@@ -47,6 +50,37 @@ namespace CalCore
                 return sb.ToString();
             }
         }
+
+        /// <summary>
+        /// 获取矩阵中的最大值
+        /// </summary>
+        public double Max
+        {
+            get
+            {
+                double result = double.NegativeInfinity; //将结果设定为一个极小值
+                for (int i = 0; i < Row; i++)
+                    for (int j = 0; j < Col; j++)
+                        if (Value[i, j] > result) result = Value[i, j];
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// 获取矩阵中的最小值
+        /// </summary>
+        public double Min
+        {
+            get
+            {
+                double result = double.PositiveInfinity; //将结果设定为一个极大值
+                for (int i = 0; i < Row; i++)
+                    for (int j = 0; j < Col; j++)
+                        if (Value[i, j] < result) result = Value[i, j];
+                return result;
+            }
+        }
+
         #endregion
 
         #region 运算
@@ -126,8 +160,17 @@ namespace CalCore
             Value = result.Value; //导入转置矩阵
             return this;
         }
-        //从指定的行列元素位置开始截取子矩阵
-        public Matrix GetSubMatrix(int r, int c, int m, int n) //r为行，c为列，m为行数，n为列数
+
+        /// <summary>
+        /// 从指定的行列元素位置开始截取子矩阵
+        /// </summary>
+        /// <param name="r">开始截取行</param>
+        /// <param name="c">开始截取列</param>
+        /// <param name="m">截取行数</param>
+        /// <param name="n">截取列数</param>
+        /// <returns>截取的矩阵</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public Matrix GetSubMatrix(int r, int c, int m, int n)
         {
             if (r >= 1 && c >= 1 && r <= Row && c <= Col) //判断参照元素位置
             {
@@ -145,7 +188,15 @@ namespace CalCore
             else throw new ArgumentOutOfRangeException("参照元素位置不存在于矩阵内");
         }
         //此处其实可以引用GetSubMatrix，但是出于执行代码量考虑就重新写了
-        public Matrix GetRows(int startRow, int n) //截取行：起始行，行数
+        /// <summary>
+        /// 从输入的矩阵中截取多行
+        /// </summary>
+        /// <param name="startRow">起始行</param>
+        /// <param name="n">截取行数</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        public Matrix GetRows(int startRow, int n)
         {
             if (startRow > 0 && startRow <= Row) //检验起始行
             {
@@ -163,7 +214,15 @@ namespace CalCore
         }
         public Matrix GetRow(int row) => GetRows(row, 1); //截取某一列
 
-        public Matrix GetCols(int startCol, int n) //截取行：起始行，行数
+        /// <summary>
+        /// 从输入的矩阵中截取多列
+        /// </summary>
+        /// <param name="startCol">起始列</param>
+        /// <param name="n">截取列数</param>
+        /// <returns>截取的多列矩阵</returns>
+        /// <exception cref="ArgumentOutOfRangeException">截取的矩阵的范围超过了矩阵本身</exception>
+        /// <exception cref="ArgumentException">起始行的位置不存在</exception>
+        public Matrix GetCols(int startCol, int n)
         {
             if (startCol > 0 && startCol <= Col) //检验起始行
             {
@@ -180,12 +239,21 @@ namespace CalCore
             else throw new ArgumentException("起始行的位置不存在");
         }
         public Matrix GetCol(int col) => GetCols(col, 1); //截取某一行
+
+        /// <summary>
+        /// 使用数学意义上的行和列获取矩阵中的值
+        /// </summary>
+        /// <param name="row">行，从1开始</param>
+        /// <param name="col">列，从1开始</param>
+        /// <returns>矩阵指定位置的数值</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public double GetValue(int row, int col) //使用数学的理解获取值
         {
             if (row < 1 || row > Row || col < 1 || col > Col)
                 throw new ArgumentOutOfRangeException("指定位置不存在于此矩阵内");
             else return Value[row - 1, col - 1];
         }
+
         #endregion
     }
 }
