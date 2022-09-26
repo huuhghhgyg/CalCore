@@ -94,5 +94,67 @@ namespace CalCore
             return result;
         }
 
+        /// <summary>
+        /// 获取最小支撑树
+        /// </summary>
+        /// <param name="pathMatrix">上三角距离方阵(默认非有向图)，不存在的路径使用正无穷表示</param>
+        /// <returns>与距离矩阵大小相同的0-1矩阵，表示选中的边</returns>
+        public static Matrix GetSpanningTree(Matrix pathMatrix)
+        {
+            if (pathMatrix.Row != pathMatrix.Col) throw new ArgumentException("输入的矩阵不是方阵，无法计算");
+
+            Matrix result = new Matrix(pathMatrix.Row, pathMatrix.Col); //结果为0-1变量矩阵
+            int size = pathMatrix.Row; //获取矩阵的行数/列数
+
+            //清空下三角矩阵
+            for (int i = 0; i < size; i++)
+                for (int j = 0; j < i; j++)
+                    pathMatrix.Value[i, j] = double.PositiveInfinity;
+
+            int[] knownPoints = new int[size]; //创建已知点集
+            int[] pointsCheck = new int[size]; //点的状态集合
+            knownPoints[0] = 0; //默认第一个点为已知点
+            pointsCheck[0] = 1; //第一个点已包含
+
+
+            for (int i = 0; i < pathMatrix.Row - 1; i++) //最小支撑树共n-1条边
+            {
+                Matrix newRow = pathMatrix.GetRow(knownPoints[i] + 1);
+                Matrix minMatrix;
+                int minRow, minCol;
+                //创建一个与原数组相同的数组
+                Matrix newMatrix = new Matrix(pathMatrix);
+
+                //矩阵过滤
+                for (int j = 0; j < newMatrix.Row; j++)
+                    for (int k = 0; k < newMatrix.Col; k++)
+                    {
+                        if (pointsCheck[j] == 1 && pointsCheck[k] == 1 || //已知点通向已知点
+                            pointsCheck[j] == 0 && pointsCheck[k] == 0) //未知点通向未知点
+                        {
+                            //屏蔽值
+                            newMatrix.Value[j, k] = double.PositiveInfinity;
+                        }
+                    }
+
+                //求最小值，即为可行最小值
+                minMatrix = newMatrix.GetMinList();
+                minRow = (int)minMatrix.Value[minMatrix.Row - 1, 0] - 1;
+                minCol = (int)minMatrix.Value[minMatrix.Row - 1, 1] - 1;
+
+                result.Value[minRow, minCol] = 1; //选中边
+                pathMatrix.Value[minRow, minCol] = double.PositiveInfinity; //消除
+                if (pointsCheck[minRow] == 0)
+                {
+                    knownPoints[i + 1] = minRow; pointsCheck[minRow] = 1; //已知点集中填入编号index，作为下一轮的对象
+                }
+                else
+                {
+                    knownPoints[i + 1] = minCol; pointsCheck[minCol] = 1; //确认本次发现的点
+                }
+            }
+
+            return result;
+        }
     }
 }

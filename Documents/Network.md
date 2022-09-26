@@ -41,3 +41,41 @@ Console.WriteLine(Network.ShortestPath2AllPoints(pathMatrix).ToString() + "\n");
 Console.WriteLine(Network.ShortestPath2LastPoint(pathMatrix).ToString() + "\n");
 //[0; 1; -2; -1; 3; 0]
 ```
+
+### GetSpanningTree
+输入一个距离方阵，返回一个同样大小的0-1矩阵，表示最小支撑树选中的边
+
+函数形式：
+```C#
+public static Matrix GetSpanningTree(Matrix pathMatrix)
+```
+举例：
+```C#
+double inf = double.PositiveInfinity;
+Matrix pathMatrix = new Matrix(new double[,]
+{
+    {inf, 2, 3, inf, inf, inf, inf, inf, inf, },
+    {inf, inf, 3, 2, inf, inf, inf, inf, 5},
+    {inf, inf, inf, inf, 2, inf, inf, 6, inf},
+    {inf, inf, inf, inf, 1, 3, inf, inf, inf},
+    {inf, inf, inf, inf, inf, inf, 3, inf, inf},
+    {inf, inf, inf, inf, inf, inf, 3, inf, 2},
+    {inf, inf, inf, inf, inf, inf, inf, 2, inf},
+    {inf, inf, inf, inf, inf, inf, inf, inf, 4},
+    {inf, inf, inf, inf, inf, inf, inf, inf, inf}
+});
+
+Matrix result = Network.GetSpanningTree(pathMatrix);
+Console.WriteLine(result.ToString());
+
+// 结果：
+// [0 1 0 0 0 0 0 0 0]
+// [0 0 0 1 0 0 0 0 0]
+// [0 0 0 0 1 0 0 0 0]
+// [0 0 0 0 1 0 0 0 0]
+// [0 0 0 0 0 0 1 0 0]
+// [0 0 0 0 0 0 1 0 1]
+// [0 0 0 0 0 0 0 1 0]
+// [0 0 0 0 0 0 0 0 0]
+// [0 0 0 0 0 0 0 0 0]
+```

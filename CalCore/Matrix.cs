@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -27,6 +28,16 @@ namespace CalCore
         public Matrix(double[,] value)
         {
             Value = value;
+        }
+
+        /// <summary>
+        /// 通过复制已有的矩阵创建新的矩阵对象
+        /// </summary>
+        /// <param name="matrix"></param>
+        public Matrix(Matrix matrix)
+        {
+            Value = new double[matrix.Row, matrix.Col];
+            Array.Copy(matrix.Value, Value, matrix.Value.Length);
         }
 
         /// <summary>
@@ -96,6 +107,21 @@ namespace CalCore
                 for (int i = 0; i < Row; i++)
                     for (int j = 0; j < Col; j++)
                         if (Value[i, j] < result) result = Value[i, j];
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// 获取矩阵中所有元素求和的值
+        /// </summary>
+        public double Sum
+        {
+            get
+            {
+                double result = 0;
+                for (int i = 0; i < Row; i++)
+                    for (int j = 0; j < Col; j++)
+                        result += Value[i, j];
                 return result;
             }
         }
@@ -274,6 +300,45 @@ namespace CalCore
             else return Value[row - 1, col - 1];
         }
 
+        /// <summary>
+        /// 获取矩阵中符合输入值的行列号列表，列表用矩阵表示
+        /// </summary>
+        /// <param name="target">要在矩阵中寻找的值</param>
+        /// <returns>用矩阵表示的行列号列表，每行表示对应点的行列号</returns>
+        public Matrix GetList(double target) //获取矩阵中符合对应值的行列号矩阵
+        {
+            ArrayList rowList = new ArrayList(); //存放行号
+            ArrayList colList = new ArrayList(); //存放列号
+
+            for(int i = 0; i < Row; i++)
+                for(int j = 0; j < Col; j++)
+                    if (Value[i, j] == target)
+                    {
+                        rowList.Add(i + 1); //添加行号
+                        colList.Add(j + 1); //添加列号
+                    }
+
+            double[,] resultList = new double[rowList.Count,2]; //坐标数组
+            for (int i = 0; i < rowList.Count; i++)
+            {
+                resultList[i, 0] = (int)rowList[i];
+                resultList[i, 1] = (int)colList[i];
+            }
+
+            return new Matrix(resultList);
+        }
+
+        /// <summary>
+        /// 获取矩阵中最小值的行列号列表，列表用矩阵表示
+        /// </summary>
+        /// <returns>用矩阵表示的行列号列表，每行表示对应点的行列号</returns>
+        public Matrix GetMinList() => GetList(Min);
+
+        /// <summary>
+        /// 获取矩阵中最大值的行列号列表，列表用矩阵表示
+        /// </summary>
+        /// <returns>用矩阵表示的行列号列表，每行表示对应点的行列号</returns>
+        public Matrix GetMaxList() => GetList(Max);
         #endregion
     }
 }

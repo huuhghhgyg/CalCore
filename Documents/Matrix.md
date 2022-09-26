@@ -13,6 +13,9 @@ Matrix mt = new Matrix(2, 3); //创建一个2行3列的矩阵
 //新建包含具体数值的矩阵
 Matrix mt1 = new Matrix(new double[,] { { 1, 2, 3 }, { 4, 5, 6 } }); //mt1:[1,2,3;4,5,6]
 Matrix mt2 = new Matrix(new double[,] { { 2, 1 }, { 3, 2 }, { 2, 4 } }); //mt2:[2,1;3,2;2,4]
+
+//根据一个已知矩阵的值新建一个矩阵
+Matrix newMt = new Matrix(mt1);
 ```
 
 ## 矩阵的值修改
@@ -53,6 +56,11 @@ Console.WriteLine($"{mt1.ValueString}\n");
 Console.WriteLine($"{mt1.T().ValueString}\n");
 ```
 两种操作得到的结果均为`[1 4; 2 5; 3 6]`
+## 求和值
+获取矩阵中所有元素的求和结果
+```C#
+Console.WriteLine(mt1.Sum); //21
+```
 
 ## 子矩阵
 ### 获取子矩阵
@@ -89,6 +97,19 @@ Console.WriteLine($"{mt1.GetCol(2).ValueString}\n");
 // [3]
 // [6]
 ```
+
+### 获取指定值的行列坐标
+根据输入的指定值在矩阵中寻找符合的元素的行列坐标列表，用矩阵表示
+```C#
+Console.WriteLine(mt2.GetList(2).ToString()); // [1 1; 2 2; 3 1]
+```
+也可以直接使用函数获取最小值和最大值的行列位置列表
+```C#
+//函数使用方法同上，形式如下
+[矩阵对象].GetMinList();
+[矩阵对象].GetMaxList();
+```
+
 
 ## 属性
 |属性|作用|
