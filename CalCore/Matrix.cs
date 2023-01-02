@@ -40,6 +40,7 @@ namespace CalCore
             Array.Copy(matrix.Value, Value, matrix.Value.Length);
         }
 
+        #region 对象属性
         /// <summary>
         /// 矩阵中存储的数值，为二维数组
         /// </summary>
@@ -52,33 +53,15 @@ namespace CalCore
         /// 矩阵的列数
         /// </summary>
         public int Col { get => Value.GetLength(1); }
+        #endregion
 
-        #region 属性
+        #region 映射属性
         /// <summary>
-        /// 将矩阵以String形式输出
+        /// 将矩阵以String形式输出。matlab格式，换行。
         /// </summary>
         public string ValueString
         {
-            get
-            {
-                StringBuilder sb = new StringBuilder();
-                int i, j = 0;
-                for (i = 0; i < Row; i++)
-                {
-                    sb.Append('['); //添加开头元素
-                    for (j = 0; j < Col; j++)
-                        sb.Append($"{Value[i, j]} "); //添加元素（带空格）
-                    if (j > 0) sb.Remove(sb.Length - 1, 1); //如果元素数量不为空，删除最后一个空格
-                    sb.Append("]\n"); //添加结尾元素
-                }
-                if (i > 0) //如果元素数量不为空，删除最后一个换行
-                    sb.Remove(sb.Length - 1, 1);
-
-                if (sb.Length == 0) //无值
-                    return "[]";
-
-                return sb.ToString();
-            }
+            get => ToString().Replace(";",";\n ");
         }
 
         /// <summary>
@@ -194,8 +177,26 @@ namespace CalCore
         public static Matrix operator *(double n, Matrix a) => a * n; //交换律
         #endregion
 
-        #region
-        public override string ToString() => ValueString; //习惯使用的函数
+        #region 函数
+        public override string ToString()
+        {
+            StringBuilder results = new StringBuilder("[");
+
+            for (int i = 0; i < Row; i++)
+                for (int j = 0; j < Col; j++)
+                {
+                    results.Append($"{Value[i, j]} ");
+                    if (j == Col - 1)
+                    {
+                        results.Remove(results.Length - 1, 1); //删除最后添加的空格
+                        results.Append(";"); //换行
+                    }
+                }
+
+            results.Remove(results.Length - 1, 1);
+            results.Append(']');
+            return results.ToString();
+        }
         public Matrix T() //矩阵转置（步骤）
         {
             Matrix result = new Matrix(Col, Row);
@@ -248,7 +249,7 @@ namespace CalCore
             {
                 if (startRow + n - 1 <= Row) //检验截取范围
                 {
-                    Matrix result = new Matrix(n, Col);
+                    Matrix result = new Matrix(n, Col); //返回一个新的矩阵
                     for (int r = startRow - 1, i = 0; i < n; r++, i++) //i,j为返回结果的index计数
                         for (int j = 0; j < Col; j++)
                             result.Value[i, j] = Value[r, j];
@@ -258,6 +259,11 @@ namespace CalCore
             }
             else throw new ArgumentException("起始行的位置不存在");
         }
+        /// <summary>
+        /// 截取某一行(row)
+        /// </summary>
+        /// <param name="row">矩阵中行的编号</param>
+        /// <returns></returns>
         public Matrix GetRow(int row) => GetRows(row, 1); //截取某一列
 
         /// <summary>
@@ -274,7 +280,7 @@ namespace CalCore
             {
                 if (startCol + n - 1 <= Col) //检验截取范围
                 {
-                    Matrix result = new Matrix(Row, n);
+                    Matrix result = new Matrix(Row, n); //返回一个新的矩阵
                     for (int c = startCol - 1, j = 0; j < n; c++, j++) //i,j为返回结果的index计数
                         for (int i = 0; i < Row; i++)
                             result.Value[i, j] = Value[i, c];
@@ -284,6 +290,11 @@ namespace CalCore
             }
             else throw new ArgumentException("起始行的位置不存在");
         }
+        /// <summary>
+        /// 截取某一列
+        /// </summary>
+        /// <param name="col">矩阵中列的编号</param>
+        /// <returns></returns>
         public Matrix GetCol(int col) => GetCols(col, 1); //截取某一行
 
         /// <summary>
@@ -293,12 +304,20 @@ namespace CalCore
         /// <param name="col">列，从1开始</param>
         /// <returns>矩阵指定位置的数值</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public double GetValue(int row, int col) //使用数学的理解获取值
+        public double Get(int row, int col) //使用数学的理解获取值
         {
             if (row < 1 || row > Row || col < 1 || col > Col)
                 throw new ArgumentOutOfRangeException("指定位置不存在于此矩阵内");
             else return Value[row - 1, col - 1];
         }
+
+        /// <summary>
+        /// 通过函数设置矩阵元素的值（也可以直接操作Value对象）
+        /// </summary>
+        /// <param name="row">行数</param>
+        /// <param name="col">列数</param>
+        /// <param name="value">元素值</param>
+        public void Set(int row, int col, double value) => Value[row - 1, col - 1] = value;
 
         /// <summary>
         /// 获取矩阵中符合输入值的行列号列表，列表用矩阵表示
