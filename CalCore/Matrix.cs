@@ -22,12 +22,13 @@ namespace CalCore
         }
 
         /// <summary>
-        /// 通过输入二维数组创建矩阵对象
+        /// 通过输入复制二维数组创建新的矩阵对象
         /// </summary>
         /// <param name="value">矩阵数值的二维数组</param>
         public Matrix(double[,] value)
         {
-            Value = value;
+            Value = new double[value.GetLength(0), value.GetLength(1)];
+            Array.Copy(value, Value, value.Length);
         }
 
         /// <summary>
@@ -38,6 +39,20 @@ namespace CalCore
         {
             Value = new double[matrix.Row, matrix.Col];
             Array.Copy(matrix.Value, Value, matrix.Value.Length);
+        }
+        /// <summary>
+        /// 根据DenseMatrix新建矩阵
+        /// </summary>
+        /// <param name="row">矩阵行数</param>
+        /// <param name="col">矩阵列数</param>
+        /// <param name="dmt">DenseMatrix对象</param>
+        public Matrix(int row, int col, DenseMatrix dmt)
+        {
+            Value = new double[row, col];
+            foreach (DenseMatrixItem item in dmt.Values)
+            {
+                Value[item.Row - 1, item.Col - 1] = item.Value;
+            }
         }
 
         #region 对象属性
@@ -61,7 +76,7 @@ namespace CalCore
         /// </summary>
         public string ValueString
         {
-            get => ToString().Replace(";",";\n ");
+            get => ToString().Replace(";", ";\n ");
         }
 
         /// <summary>
@@ -329,15 +344,15 @@ namespace CalCore
             ArrayList rowList = new ArrayList(); //存放行号
             ArrayList colList = new ArrayList(); //存放列号
 
-            for(int i = 0; i < Row; i++)
-                for(int j = 0; j < Col; j++)
+            for (int i = 0; i < Row; i++)
+                for (int j = 0; j < Col; j++)
                     if (Value[i, j] == target)
                     {
                         rowList.Add(i + 1); //添加行号
                         colList.Add(j + 1); //添加列号
                     }
 
-            double[,] resultList = new double[rowList.Count,2]; //坐标数组
+            double[,] resultList = new double[rowList.Count, 2]; //坐标数组
             for (int i = 0; i < rowList.Count; i++)
             {
                 resultList[i, 0] = (int)rowList[i];
