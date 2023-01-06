@@ -41,12 +41,44 @@ namespace CalCore
             Array.Copy(matrix.Value, Value, matrix.Value.Length);
         }
         /// <summary>
+        /// 将原有矩阵嵌入新矩阵，原矩阵在新矩阵中的坐标为原矩阵右上角的坐标
+        /// </summary>
+        /// <param name="matrix">矩阵对象</param>
+        /// <param name="rows">新建矩阵的行数</param>
+        /// <param name="cols">新建矩阵的列数</param>
+        /// <param name="row0">原矩阵第一行嵌入新矩阵的行位置(自然位置)</param>
+        /// <param name="col0">原矩阵第一列嵌入新矩阵的列位置(自然位置)</param>
+        /// <exception cref="ArgumentOutOfRangeException">嵌入位置超过允许范围</exception>
+        public Matrix(Matrix matrix, int rows, int cols, int row0, int col0)
+        {
+            if (row0 <= 0 || col0 <= 0)
+                if (row0 <= 0) throw new ArgumentOutOfRangeException(nameof(row0), "指定行位置小于0");
+                else throw new ArgumentOutOfRangeException(nameof(col0), "指定列位置小于0");
+
+            Value = new double[rows, cols];
+            if (rows - matrix.Row + 1 >= row0 && cols - matrix.Col + 1 >= col0)
+                for (int r = 0; r < matrix.Row; r++)
+                    for (int c = 0; c < matrix.Col; c++)
+                        Value[r + row0 - 1, c + col0 - 1] = matrix.Value[r, c];
+            else if (rows - matrix.Row >= row0)
+                throw new ArgumentOutOfRangeException(nameof(row0), $"参数row0超过最大允许值{rows - matrix.Row + 1}");
+            else
+                throw new ArgumentOutOfRangeException(nameof(col0), $"参数col0超过最大允许值{cols - matrix.Col + 1}");
+        }
+        /// <summary>
+        /// 将原有矩阵嵌入新矩阵的第一行第一列
+        /// </summary>
+        /// <param name="matrix">矩阵对象</param>
+        /// <param name="rows">新建矩阵的行数</param>
+        /// <param name="cols">新建矩阵的列数</param>
+        public Matrix(Matrix matrix, int rows, int cols) => Value = new Matrix(matrix, rows, cols, 1, 1).Value;
+        /// <summary>
         /// 根据DenseMatrix新建矩阵
         /// </summary>
         /// <param name="row">矩阵行数</param>
         /// <param name="col">矩阵列数</param>
         /// <param name="dmt">DenseMatrix对象</param>
-        public Matrix(int row, int col, DenseMatrix dmt)
+        public Matrix(DenseMatrix dmt, int row, int col)
         {
             Value = new double[row, col];
             foreach (DenseMatrixItem item in dmt.Values)

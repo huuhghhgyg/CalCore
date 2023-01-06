@@ -11,6 +11,7 @@
 - `DenseMatrix`：稠密型矩阵，仅记录行、列、值。
 
 ## 新建矩阵
+### 直接创建新矩阵
 ```C#
 //新建大小为n*m的0矩阵：
 Matrix mt = new Matrix(2, 3); //创建一个2行3列的矩阵
@@ -18,12 +19,26 @@ Matrix mt = new Matrix(2, 3); //创建一个2行3列的矩阵
 //新建包含具体数值的矩阵
 Matrix mt1 = new Matrix(new double[,] { { 1, 2, 3 }, { 4, 5, 6 } }); //mt1:[1,2,3;4,5,6]
 Matrix mt2 = new Matrix(new double[,] { { 2, 1 }, { 3, 2 }, { 2, 4 } }); //mt2:[2,1;3,2;2,4]
+```
 
+### 根据原有矩阵/稠密矩阵创建新矩阵
+```C#
 //根据一个已知矩阵复制一个矩阵
 Matrix newMt = new Matrix(mt1);
+```
 
+```C#
 //根据将稠密矩阵DenseMatrix转换为普通矩阵Matix:
-Matrix mt3 = new Matrix(9, 9, dmt); //输入参数：行数、列数、DenseMatrix对象
+Matrix matrix = new Matrix(dmt, rows, cols);
+// 输入参数：
+// dmt  DenseMatrix对象
+// rows 新建矩阵的行数
+// cols 新建矩阵的列数
+```
+
+示例
+```C#
+Matrix mt3 = new Matrix(dmt, 9, 9);
 // DenseMatrix dmt
 // [1 1 2;
 //  7 8 8;
@@ -38,6 +53,54 @@ Matrix mt3 = new Matrix(9, 9, dmt); //输入参数：行数、列数、DenseMatr
 //  0 0 0 0 0 0 8 8 0;
 //  0 0 0 0 0 0 0 0 0;
 //  0 0 0 0 0 0 0 0 0]
+```
+
+### 将原有矩阵安排在新矩阵中
+函数
+```C#
+// 将原有矩阵安排在新矩阵的左上角
+Matrix matrix = new Matrix(matrix0, rows, cols)
+```
+
+```C#
+// 将原有矩阵安排在新矩阵的指定行列位置
+Matrix matrix = new Matrix(matrix0, rows, cols, row0, col0)
+```
+函数参数列表
+| 参数      | 含义       |
+| --------- | ---------- |
+| `matrix0` | 原矩阵     |
+| `rows`    | 新矩阵行数 |
+| `cols`    | 新矩阵列数 |
+| `row0`    | 指定行位置 |
+| `col0`    | 指定列位置 |
+
+用法示例
+```C#
+// 创建原有矩阵mt1
+Matrix mt1 = new Matrix(new double[,] { { 1, 2, 3 }, { 4, 5, 6 } });
+Console.WriteLine($"mt1\n{mt1.ValueString}");
+// mt1
+// [1 2 3;
+//  4 5 6]
+
+// 创建4*5的新矩阵，将原有矩阵安放在左上角
+Matrix mt2 = new Matrix(mt1, 4, 5);
+Console.WriteLine($"mt2\n{mt2.ValueString}");
+// mt2
+// [1 2 3 0 0;
+//  4 5 6 0 0;
+//  0 0 0 0 0;
+//  0 0 0 0 0]
+
+// 创建4*5的新矩阵，将原有矩阵安放在2行2列
+Matrix mt3 = new Matrix(mt1, 4, 5, 2, 2);
+Console.WriteLine($"mt3\n{mt3.ValueString}");
+// mt3
+// [0 0 0 0 0;
+//  0 1 2 3 0;
+//  0 4 5 6 0;
+//  0 0 0 0 0]
 ```
 
 ## 新建稠密矩阵
@@ -242,12 +305,12 @@ Console.WriteLine($"{mt1.GetSubMatrix(1, 1, 2, 2).ValueString}\n");
 ```
 ### 截取行/列
 截取行和列同理。有函数如下：
-|函数名|参数解释|
-|---|---|
-|`GetRow(row)`|截取矩阵中某行，`row`为需要截取的行号，从1开始记起|
-|`GetRows(startRow, n)`|截取矩阵中某几行，`startRow`为开始截取的行号，从1开始记起，`n`为需要截取的行数|
-|`GetCol(col)`|截取矩阵中某列，`col`为需要截取的列号，从1开始记起|
-|`GetCols(startCow, n)`|截取矩阵中某几列，`startCow`为开始截取的列号，从1开始记起，`n`为需要截取的列数|
+| 函数名                 | 参数解释                                                                       |
+| ---------------------- | ------------------------------------------------------------------------------ |
+| `GetRow(row)`          | 截取矩阵中某行，`row`为需要截取的行号，从1开始记起                             |
+| `GetRows(startRow, n)` | 截取矩阵中某几行，`startRow`为开始截取的行号，从1开始记起，`n`为需要截取的行数 |
+| `GetCol(col)`          | 截取矩阵中某列，`col`为需要截取的列号，从1开始记起                             |
+| `GetCols(startCow, n)` | 截取矩阵中某几列，`startCow`为开始截取的列号，从1开始记起，`n`为需要截取的列数 |
 
 以截取列为例
 ```C#
@@ -275,8 +338,8 @@ Console.WriteLine(mt2.GetList(2).ToString()); // [1 1; 2 2; 3 1]
 ```
 
 ## 属性
-|属性|作用|
-|---|---|
-|`Row`|实时获取并返回矩阵的行数|
-|`Col`|实时获取并返回矩阵的列数|
-|`ValueString`|返回转化为Matlab格式的字符串的矩阵，如`[1 2;\n3 4]`（不需要换行符'\n'的版本可以使用ToString()）|
+| 属性          | 作用                                                                                            |
+| ------------- | ----------------------------------------------------------------------------------------------- |
+| `Row`         | 实时获取并返回矩阵的行数                                                                        |
+| `Col`         | 实时获取并返回矩阵的列数                                                                        |
+| `ValueString` | 返回转化为Matlab格式的字符串的矩阵，如`[1 2;\n3 4]`（不需要换行符'\n'的版本可以使用ToString()） |
