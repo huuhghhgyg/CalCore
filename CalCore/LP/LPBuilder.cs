@@ -43,7 +43,19 @@ namespace CalCore.LP
             int symId = SymbolTranslator(sym);
             if (symId == -1) throw new ArgumentException($"输入的符号{sym}有误");
 
-            LPBuilderItem item = new LPBuilderItem(coeff, symId, b);
+            //复制数组
+            double[] coeffNew = new double[coeff.Length];
+            Array.Copy(coeff, coeffNew, coeff.Length);
+
+            //检测右端项是否为标准型（大于0），并修正
+            if (b < 0)
+            {
+                for (int i = 0; i < coeff.Length; i++) coeffNew[i] *= -1; //系数全部*-1
+                if (symId != 1) symId = symId == 0 ? 2 : 0; //非等号需要变号
+                b *= -1; //右端项*-1
+            }
+
+            LPBuilderItem item = new LPBuilderItem(coeffNew, symId, b);
             constraints.Add(item);
         }
 
@@ -64,11 +76,11 @@ namespace CalCore.LP
             int geNum = 0; //需要添加辅助变量的个数
             foreach (LPBuilderItem item in constraints)
                 if (item.sym != Symbol.EQ)
-                    if (item.sym == Symbol.GE) geNum++; // >=需要额外添加一个变量
+                    if (item.sym == Symbol.GE) geNum++; // >=需要额外添加辅助变量用于求解
 
-            //添加辅助变量
+            //添加平衡变量和辅助变量
             int length = objFunc.Length; //目标函数长度
-            Matrix cons = new Matrix(constraints.Count, length + constraints.Count + geNum + 1);
+            Matrix cons = new Matrix(constraints.Count, length + constraints.Count + geNum + 1); //矩阵大小
             //max
             int geIndex = 0; //>=约束的编号
             for (int i = 0; i < constraints.Count; i++) //每条约束
@@ -77,9 +89,56 @@ namespace CalCore.LP
                 {
                     cons.Value[i, j] = constraints[i].coeff[j]; //复制约束
                 }
-                if (constraints[i].sym == Symbol.GE) cons.Value[i, length + geIndex++] = -1; //添加用于求解>=的辅助变量
-                cons.Value[i, length + geNum + i] = 1; //辅助变量
+                //if (constraints[i].sym == Symbol.GE) cons.Value[i, length + geIndex++] = -1; //添加用于求解>=的辅助变量
+                //cons.Value[i, length + geNum + i] = 1; //辅助变量
+                if (constraints[i].sym == Symbol.GE)
+                {
+                    cons.Value[i, length + i] = -1; //添加平衡变量(>=)
+                    cons.Value[i, length + constraints.Count + geIndex++] = 1; //添加辅助变量
+                    //Console.WriteLine($"ge行:\n{cons.ValueString}");
+                }
+                else cons.Value[i, length + i] = 1; //添加平衡变量(<=或==)
                 cons.Value[i, cons.Col - 1] = constraints[i].b;
+            }
+            //发送第一阶段的求解
+            if (geNum > 0) //只有出现>=的时候需要预求解
+            {
+                Console.WriteLine($"准备发送第一阶段的求解矩阵：\n{cons.ValueString}");
+                double[] objFuncS1 = new double[cons.Col - 1];
+                for (int i = length + constraints.Count; i < cons.Col - 1; i++) //设置第一阶段求解的目标函数
+                    objFuncS1[i] = -1; //求min
+
+                int[] baseNums = new int[constraints.Count]; //找到每行的基变量
+                Simplex.GetRowBV(cons, baseNums);
+
+                //处理Sig
+                //int[] aidBaseNumI = new int[geNum]; //辅助变量的基变量行号
+                double[] sig = new double[cons.Col - 1];
+                for (int k = 0; k < cons.Col - 1; k++) sig[k] += objFuncS1[k];
+                for (int i = 0, j = 0; j < geNum; i++) //填充辅助变量列表
+                {
+                    if (baseNums[i] > length + constraints.Count)
+                    {
+                        //aidBaseNumI[j++] = i; //填充行号
+                        j++;
+                        for (int k = 0; k < cons.Col - 1; k++) sig[k] += cons.Value[i, k];
+                    }
+                }
+                Simplex.SimplexItem simplexItem0 = Simplex.Optimize(objFuncS1, cons, -1, 5, sig);
+
+                Console.WriteLine($"第一阶段求解值={simplexItem0.RHS},第一阶段{(simplexItem0.RHS == 0 ? "有最优解" : "无最优解")}");
+                if (simplexItem0.RHS != 0)
+                    return; //无最优解，直接结束求解
+                else
+                {
+                    //将迭代得到的系数直接嵌入矩阵中
+                    //其中会包含最后一列，为预留的b列空间
+                    Matrix coeff0 = simplexItem0.Coeff; //映射方便操作
+                    cons = new Matrix(coeff0.GetCols(1, length + constraints.Count + 1));
+                    //填入b值
+                    for (int i = 1; i <= cons.Row; i++)
+                        cons.Set(i, cons.Col, coeff0.Get(i, coeff0.Col));
+                }
             }
 
             //设置目标函数
@@ -94,7 +153,13 @@ namespace CalCore.LP
             Console.WriteLine(objfmtx.ValueString);
             Console.WriteLine(cons.ValueString);
 
-            Simplex.Optimize(objFuncCoeff, cons, 100);
+            Simplex.SimplexItem simplexItem = Simplex.Optimize(objFuncCoeff, cons, 1, 100);
+            if (simplexItem != null && simplexItem.resultArr != null)
+            {
+                Console.WriteLine($"最优值RHS={simplexItem.RHS * (type == Target.min ? -1 : 1)}");
+                Console.WriteLine($"解向量：\n{simplexItem.resultArr.ValueString}");
+            }
+            else Console.WriteLine("求解失败");
         }
         #endregion
     }

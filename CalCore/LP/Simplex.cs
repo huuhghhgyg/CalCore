@@ -10,9 +10,11 @@ namespace CalCore.LP
         {
             public double[] ObjFunc { get; set; } //目标函数向量
             public Matrix Sig { get; set; } //目标函数标准型
+            public bool SigUpdate { get; set; } = true; //是否跳过更新检验数行
             public Matrix Coeff { get; set; } //约束方程矩阵
             public double RHS { get; set; } //最优值
             public int[] RowObjFuncCoeff { get; set; } //行目标函数系数
+            public Matrix resultArr { get; set; } //解向量
         }
 
         /// <summary>
@@ -20,9 +22,11 @@ namespace CalCore.LP
         /// </summary>
         /// <param name="objFunc">目标函数数组</param>
         /// <param name="coeff">约束系数矩阵</param>
+        /// <param name=isMax">默认求最大，值为1；求最小设为-1</param>
         /// <param name="maxIterate">最大迭代次数</param>
+        /// <param name="sig">输入初始检验数行</param>
         /// <returns></returns>
-        public static Matrix Optimize(double[] objFunc, Matrix coeff, int maxIterate)
+        public static SimplexItem Optimize(double[] objFunc, Matrix coeff, int isMax = 1, double maxIterate = double.PositiveInfinity, double[] sig = null)
         {
             // Initialize
             int rows = coeff.Row, cols = coeff.Col; //设置行列数
@@ -33,9 +37,18 @@ namespace CalCore.LP
             item.RowObjFuncCoeff = new int[rows];
 
             // 初始化Sig值，判断初始是否最优
-            item.Sig = new Matrix(1, objFunc.Length);
-            for (int i = 0; i < objFunc.Length; i++) item.Sig.Value[0, i] = objFunc[i];
-            item.Sig = -item.Sig;
+            if (sig == null)
+            {
+                item.Sig = new Matrix(1, objFunc.Length);
+                for (int i = 0; i < objFunc.Length; i++) item.Sig.Value[0, i] = objFunc[i];
+                item.Sig = -item.Sig;
+            }
+            else
+            {
+                item.Sig = new Matrix(1, objFunc.Length);
+                for (int i = 0; i < sig.Length; i++) //复制sig值
+                    item.Sig.Value[0, i] = sig[i];
+            }
 
             // 初始化约束方程矩阵
             item.Coeff = new Matrix(coeff);
@@ -52,12 +65,20 @@ namespace CalCore.LP
             while (item.Sig.Min < 0 && state == 0 && count++ < maxIterate) //只要有值小于0，就继续迭代
             {
                 Console.WriteLine($"\n迭代{count}：");
-                state = Iterate(item);
+                state = Iterate(item, isMax);
             }
+
+            string msg;
+            if (item.Sig.Min >= 0) msg = "找到最优值";
+            else if (state != 0) msg = "迭代非成功";
+            else msg = "超过最大迭代次数";
+            Console.WriteLine("\n结束原因：" + msg);
+            Console.WriteLine(item.Sig.ValueString);
+            Console.WriteLine(item.Coeff.ValueString);
 
             if (state == IterateState.Success)
             {
-                Console.WriteLine("最优值：" + item.RHS);
+                //Console.WriteLine("最优值：" + item.RHS);
 
                 // 获取解
                 int[] baseNum = new int[rows];
@@ -68,10 +89,29 @@ namespace CalCore.LP
                 {
                     result.Set(1, baseNum[i], item.Coeff.Value[i, cols - 1]);
                 }
-                Console.WriteLine("解向量：\n" + result.ValueString);
-                return result;
+                item.resultArr = result;
+                //Console.WriteLine("解向量：\n" + result.ValueString);
+
+                //获取行对应变量
+                double[] objFuncCoeff = new double[rows];
+                // 行 i+1 的系数为 objFuncCoeff[i]
+                for (int i = 0; i < rows; i++) //计算CB
+                {
+                    objFuncCoeff[i] = item.ObjFunc[baseNum[i] - 1]; //获取对应CB
+                    //Console.WriteLine($"行{i + 1}的系数为{objFuncCoeff[i]}");
+                }
+
+                //更新RHS
+                double rhsSum = 0;
+                for (int i = 0; i < rows; i++)
+                {
+                    rhsSum += objFuncCoeff[i] * item.Coeff.Get(i + 1, cols);
+                }
+                item.RHS = rhsSum;
+
+                return item; //返回单纯形表
             }
-            else return null; // 求解失败
+            else return null; //求解失败
         }
 
         /// <summary>
@@ -80,7 +120,7 @@ namespace CalCore.LP
         /// <param name="cmt">传入的约束矩阵</param>
         /// <param name="baseNum">传入用于存储基变量的数组</param>
         /// 通过扫描行中1的列确定是否基变量，行i的基变量为Xj
-        private static void GetRowBV(Matrix cmt, int[] baseNum)
+        internal static void GetRowBV(Matrix cmt, int[] baseNum)
         {
             int rows = cmt.Row, cols = cmt.Col;
 
@@ -104,7 +144,7 @@ namespace CalCore.LP
                         {
                             baseFound = true;
                             baseNum[i - 1] = j;
-                            //Console.WriteLine($"行{i}的基变量为X{j}");
+                            Console.WriteLine($"行{i}的基变量为X{j}");
                         }
                     }
                 }
@@ -115,8 +155,9 @@ namespace CalCore.LP
         /// 对单纯形表对象进行迭代
         /// </summary>
         /// <param name="item">单纯形表对象</param>
+        /// <param name="coeff">可选参数，默认求最大。设为-1求最小</param>
         /// <returns>迭代状态对象</returns>
-        public static IterateState Iterate(SimplexItem item)
+        public static IterateState Iterate(SimplexItem item, int coeff = 1)
         {
             Console.WriteLine($"输入值:\n{item.Sig.ValueString}\n{item.Coeff.ValueString}");
 
@@ -130,25 +171,30 @@ namespace CalCore.LP
             int[] baseNum = new int[rows];
             GetRowBV(cmt, baseNum);
 
-
-            // 更新检验数行
-            // 行 i+1 的系数为 objFuncCoeff[i]
             double[] objFuncCoeff = new double[rows];
+            // 行 i+1 的系数为 objFuncCoeff[i]
             for (int i = 0; i < rows; i++) //计算CB
             {
                 objFuncCoeff[i] = item.ObjFunc[baseNum[i] - 1]; //获取对应CB
                 //Console.WriteLine($"行{i + 1}的系数为{objFuncCoeff[i]}");
             }
-            for (int i = 0; i < cols - 1; i++) //逐列计算检验数Sig
+
+
+            // 更新检验数行
+            if (item.SigUpdate)
             {
-                double sigI = -item.ObjFunc[i];
-                for (int j = 0; j < rows; j++) //遍历行
+                for (int i = 0; i < cols - 1; i++) //逐列计算检验数Sig
                 {
-                    sigI += objFuncCoeff[j] * cmt.Get(j + 1, i + 1);
+                    double sigI = -item.ObjFunc[i];
+                    for (int j = 0; j < rows; j++) //遍历行
+                    {
+                        sigI += objFuncCoeff[j] * cmt.Get(j + 1, i + 1);
+                    }
+                    //Console.WriteLine($"列{i + 1}检验数为{sigI}");
+                    item.Sig.Value[0, i] = sigI;
                 }
-                //Console.WriteLine($"列{i + 1}检验数为{sigI}");
-                item.Sig.Value[0, i] = sigI;
             }
+            else item.SigUpdate = true; //重新打开更新检验行的设置
 
 
             //更新RHS
@@ -158,7 +204,6 @@ namespace CalCore.LP
                 rhsSum += objFuncCoeff[i] * cmt.Get(i + 1, cols);
             }
             item.RHS = rhsSum;
-            Console.WriteLine("RHS=" + rhsSum);
 
 
             // 找到最小的CB值对应的列
@@ -171,7 +216,7 @@ namespace CalCore.LP
                     minSig = cb.Get(1, i);
                     minSigCol = i;
                 }
-            //Console.WriteLine($"最小CB值为{minSig},在第{minSigCol}列");
+            Console.WriteLine($"最{(coeff == 1 ? "小" : "大")}Sig值为{minSig},在第{minSigCol}列,Sig:\n{cb.ValueString}");
 
 
             // 计算比值，得到最小比值项，对应变量进基
@@ -182,7 +227,7 @@ namespace CalCore.LP
             int minThetaRow = 1;
             for (int i = 1; i <= rows; i++)
             {
-                //Console.WriteLine($"theta({i})={cmt.Get(i, cols)}/{cmt.Get(i, minSigCol)}");
+                Console.WriteLine($"theta({i})={cmt.Get(i, cols)}/{cmt.Get(i, minSigCol)}");
                 theta[i - 1] = cmt.Get(i, cols) / cmt.Get(i, minSigCol); //b/a （当被除数为0，计算为正无穷）
                 if (theta[i - 1] < 0) theta[i - 1] = double.PositiveInfinity; //不允许存在负数
                 if (theta[i - 1] < theta[minThetaRow - 1]) minThetaRow = i;
