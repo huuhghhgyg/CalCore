@@ -85,7 +85,7 @@ namespace CalCore.LP
         /// <summary>
         /// 对LP对象进行求解
         /// </summary>
-        public void Solve()
+        public void Solve(double maxIterate = double.PositiveInfinity)
         {
             //搜索非标准型约束的个数
             int geNum = 0; //需要添加辅助变量的个数
@@ -139,7 +139,7 @@ namespace CalCore.LP
                         for (int k = 0; k < cons.Col - 1; k++) sig[k] += cons.Value[i, k];
                     }
                 }
-                Simplex.SimplexItem simplexItem0 = Simplex.Optimize(objFuncS1, cons, -1, 5, sig);
+                Simplex.SimplexItem simplexItem0 = Simplex.Optimize(objFuncS1, cons, -1, maxIterate, sig);
 
                 Console.WriteLine($"第一阶段求解值={simplexItem0.RHS},第一阶段{(simplexItem0.RHS == 0 ? "有最优解" : "无最优解")}");
                 if (simplexItem0.RHS != 0)
@@ -168,7 +168,7 @@ namespace CalCore.LP
             Console.WriteLine(objfmtx.ValueString);
             Console.WriteLine(cons.ValueString);
 
-            Simplex.SimplexItem simplexItem = Simplex.Optimize(objFuncCoeff, cons, 1, 100);
+            Simplex.SimplexItem simplexItem = Simplex.Optimize(objFuncCoeff, cons, 1, maxIterate);
             if (simplexItem != null && simplexItem.resultArr != null)
             {
                 Console.WriteLine($"最优值RHS={simplexItem.RHS * (type == Target.min ? -1 : 1)}");

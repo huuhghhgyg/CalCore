@@ -66,12 +66,18 @@ namespace CalCore.LP
             {
                 Console.WriteLine($"\n迭代{count}：");
                 state = Iterate(item, isMax);
+                Console.WriteLine($"RHS={item.RHS}");
             }
 
             string msg;
             if (item.Sig.Min >= 0) msg = "找到最优值";
             else if (state != 0) msg = "迭代非成功";
-            else msg = "超过最大迭代次数";
+            else
+            {
+                msg = "超过最大迭代次数";
+                Console.WriteLine("\n结束原因：" + msg);
+                return item; //返回迭代得到的单纯形表
+            }
             Console.WriteLine("\n结束原因：" + msg);
             Console.WriteLine(item.Sig.ValueString);
             Console.WriteLine(item.Coeff.ValueString);
