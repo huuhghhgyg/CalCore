@@ -67,6 +67,23 @@ namespace CalCore.LP
         }
 
         /// <summary>
+        /// 将标准形式矩阵导入模型(约束方程符号为<=)
+        /// </summary>
+        /// <param name="constraints">系数和右端项组成的的二维数组</param>
+        public void SetConstraints(double[,] constraints)
+        {
+            int row = constraints.GetLength(0), col = constraints.GetLength(1);
+
+            for (int i = 0; i < row; i++)
+            {
+                double[] cons = new double[col - 1]; //定义系数
+                for (int j = 0; j < col - 1; j++) cons[j] = constraints[i, j]; //复制系数
+                double b = constraints[i, col - 1]; //右端项
+                AddConstraint(cons, "<=", b);
+            }
+        }
+
+        /// <summary>
         /// 将string类型的约束方程符号转换为对应的Symbol类型的int类型变量
         /// </summary>
         /// <param name="sym"></param>
