@@ -37,6 +37,13 @@ namespace CalCore.LP
         #endregion
 
         #region 函数
+        /// <summary>
+        /// 为模型添加约束
+        /// </summary>
+        /// <param name="coeff">约束方程系数</param>
+        /// <param name="sym">约束方程的符号，"<="、"=="或">="</param>
+        /// <param name="b">约束方程右端项</param>
+        /// <exception cref="ArgumentException"></exception>
         public void AddConstraint(double[] coeff, string sym, double b)
         {
             // 检测符号
@@ -59,6 +66,11 @@ namespace CalCore.LP
             constraints.Add(item);
         }
 
+        /// <summary>
+        /// 将string类型的约束方程符号转换为对应的Symbol类型的int类型变量
+        /// </summary>
+        /// <param name="sym"></param>
+        /// <returns>对应Symbol类型的变量。返回-1表示未识别成功</returns>
         private int SymbolTranslator(string sym)
         {
             switch (sym)
@@ -70,6 +82,9 @@ namespace CalCore.LP
             }
         }
 
+        /// <summary>
+        /// 对LP对象进行求解
+        /// </summary>
         public void Solve()
         {
             //搜索非标准型约束的个数
