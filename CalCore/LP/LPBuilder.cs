@@ -105,7 +105,7 @@ namespace CalCore.LP
         public void Solve(double maxIterate = double.PositiveInfinity)
         {
             //搜索非标准型约束的个数
-            int geNum = 0; //需要添加辅助变量的个数
+            int geNum = 0, eqNum = 0; //需要添加辅助变量的个数
             foreach (LPBuilderItem item in constraints)
                 if (item.sym != Symbol.EQ)
                     if (item.sym == Symbol.GE) geNum++; // >=需要额外添加辅助变量用于求解
@@ -115,6 +115,7 @@ namespace CalCore.LP
             Matrix cons = new Matrix(constraints.Count, length + constraints.Count + geNum + 1); //矩阵大小
             //max
             int geIndex = 0; //>=约束的编号
+            int[] eq = new int[length + constraints.Count]; //记录==约束的位置
             for (int i = 0; i < constraints.Count; i++) //每条约束
             {
                 for (int j = 0; j < length; j++) //每个变量
@@ -129,16 +130,27 @@ namespace CalCore.LP
                     cons.Value[i, length + constraints.Count + geIndex++] = 1; //添加辅助变量
                     //Console.WriteLine($"ge行:\n{cons.ValueString}");
                 }
-                else cons.Value[i, length + i] = 1; //添加平衡变量(<=或==)
+                else
+                {
+                    if (constraints[i].sym == Symbol.EQ)
+                    {
+                        eq[length + i] = -1; //==需要预求解
+                        eqNum++;
+                    }
+                    cons.Value[i, length + i] = 1; //添加平衡变量(<=或==)
+                }
                 cons.Value[i, cons.Col - 1] = constraints[i].b;
             }
+
             //发送第一阶段的求解
-            if (geNum > 0) //只有出现>=的时候需要预求解
+            if (geNum > 0 || eqNum > 0) //出现>=和==的时候需要预求解
             {
                 Console.WriteLine($"准备发送第一阶段的求解矩阵：\n{cons.ValueString}");
                 double[] objFuncS1 = new double[cons.Col - 1];
+                //目标函数求min,-1
                 for (int i = length + constraints.Count; i < cons.Col - 1; i++) //设置第一阶段求解的目标函数
-                    objFuncS1[i] = -1; //求min
+                    objFuncS1[i] = -1;
+                Array.Copy(eq, objFuncS1, eq.Length); //复制==辅助变量的位置
 
                 int[] baseNums = new int[constraints.Count]; //找到每行的基变量
                 Simplex.GetRowBV(cons, baseNums);
@@ -160,7 +172,10 @@ namespace CalCore.LP
 
                 Console.WriteLine($"第一阶段求解值={simplexItem0.RHS},第一阶段{(simplexItem0.RHS == 0 ? "有最优解" : "无最优解")}");
                 if (simplexItem0.RHS != 0)
+                {
+                    Console.WriteLine("该问题无最优解");
                     return; //无最优解，直接结束求解
+                }
                 else
                 {
                     //将迭代得到的系数直接嵌入矩阵中

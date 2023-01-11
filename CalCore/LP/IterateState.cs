@@ -6,7 +6,8 @@ namespace CalCore.LP
 {
     public enum IterateState
     {
-        Success,
-        Unbounded,
+        Success, //成功
+        Unbounded, //无界解
+        Infeasible, //无可行解
     }
 }
