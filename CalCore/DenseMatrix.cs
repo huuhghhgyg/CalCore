@@ -18,26 +18,26 @@ namespace CalCore
             Values = new List<DenseMatrixItem>();
         }
         /// <summary>
-        /// 通过传入DenseMatrixItem类型的数组创建新的DenseMatrix对象
+        /// 通过传入DenseMatrixItem类型的列表创建新的DenseMatrix对象
         /// </summary>
-        /// <param name="array">DenseMatrixItem的数组</param>
-        public DenseMatrix(DenseMatrixItem[] array)
+        /// <param name="list">DenseMatrixItem的数组</param>
+        public DenseMatrix(List<DenseMatrixItem> list)
         {
-            Values = array.ToList();
+            Values = new List<DenseMatrixItem>(list);
         }
         /// <summary>
-        /// 通过传入Matrix类型的对象创建新的DenseMatrix对象
+        /// 通过传入Matrix并指定背景数创建新的DenseMatrix对象
         /// </summary>
         /// <param name="matrix">要创建为稠密矩阵的矩阵对象</param>
-        public DenseMatrix(Matrix matrix)
+        /// <param name="baseNum">可选。背景数，当原矩阵中值为此值时忽略，默认值为0</param>
+        public DenseMatrix(Matrix matrix, double baseNum = 0)
         {
             Values = new List<DenseMatrixItem>(); //初始化值
 
             for (int i = 1; i <= matrix.Row; i++)
                 for (int j = 1; j <= matrix.Col; j++)
-                    if (matrix.Get(i, j) != 0) Set(i, j, matrix.Get(i, j));
+                    if (matrix.Get(i, j) != baseNum) Set(i, j, matrix.Get(i, j));
         }
-
         /// <summary>
         /// 复制一个DenseMatrixItem对象
         /// </summary>
@@ -100,6 +100,28 @@ namespace CalCore
         public string ValueString
         {
             get => ToString().Replace(";", ";\n ");
+        }
+
+        public int RowMax
+        {
+            get
+            {
+                var list = from value in Values
+                           orderby value.Row descending
+                           select value.Row;
+                return list.ToList()[0];
+            }
+        }
+
+        public int ColMax
+        {
+            get
+            {
+                var list = from value in Values
+                           orderby value.Col descending
+                           select value.Col;
+                return list.ToList()[0];
+            }
         }
         #endregion
 

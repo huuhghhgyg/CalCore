@@ -75,12 +75,18 @@ namespace CalCore
         /// <summary>
         /// 根据DenseMatrix新建矩阵
         /// </summary>
+        /// <param name="dmt">DenseMatrix对象</param>
         /// <param name="row">矩阵行数</param>
         /// <param name="col">矩阵列数</param>
-        /// <param name="dmt">DenseMatrix对象</param>
-        public Matrix(DenseMatrix dmt, int row, int col)
+        /// <param name="baseNum">填充Matrix空白位置的背景值，默认为0</param>
+        public Matrix(DenseMatrix dmt, int row, int col, double baseNum = 0)
         {
             Value = new double[row, col];
+            if (baseNum != 0)
+                for (int i = 0; i < row; i++)
+                    for (int j = 0; j < col; j++)
+                        Value[i, j] = baseNum; //填充自定义的背景值
+
             foreach (DenseMatrixItem item in dmt.Values)
             {
                 Value[item.Row - 1, item.Col - 1] = item.Value;

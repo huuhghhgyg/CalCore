@@ -29,12 +29,14 @@ Matrix newMt = new Matrix(mt1);
 
 ```C#
 //根据将稠密矩阵DenseMatrix转换为普通矩阵Matix:
-Matrix matrix = new Matrix(dmt, rows, cols);
-// 输入参数：
-// dmt  DenseMatrix对象
-// rows 新建矩阵的行数
-// cols 新建矩阵的列数
+Matrix matrix = new Matrix(dmt, rows, cols, [baseNum]);
 ```
+| 参数      | 含义                              |
+| --------- | --------------------------------- |
+| `dmt`     | DenseMatrix对象                   |
+| `rows`    | 新建矩阵的行数                    |
+| `cols`    | 新建矩阵的列数                    |
+| `baseNum` | 可选参数。矩阵的背景数值，默认为0 |
 
 示例
 ```C#
@@ -109,63 +111,58 @@ Console.WriteLine($"mt3\n{mt3.ValueString}");
 DenseMatrix dmt = new DenseMatrix();
 
 //通过已知矩阵mt创建DenseMatrix（将Matrix转换为新的DenseMatrix对象）
-DenseMatrix dmt2 = new DenseMatrix(mt);
+DenseMatrix dmt2 = new DenseMatrix(Matrix mt, [double baseNum]);
 
-//通过DenseMatrixItem的数组array创建DenseMatrix
-DenseMatrix dmt3 = new DenseMatrix(array);
+//通过DenseMatrixItem的List创建DenseMatrix
+DenseMatrix dmt3 = new DenseMatrix(List<DenseMatrixItem> list);
 ```
 
-为了进一步体现复制的区别，此处对`DenseMatrix`对象做了如下实验：
+为了进一步体现复制和映射(引用)的区别，对`DenseMatrix`对象做了复制实验，见[附录1](#矩阵复制实验)。
+
+### 将Matrix转换为新的DenseMatrix对象
+
 ```C#
-// 创建DenseMatrixItem数组，通过这种方式创建DenseMatrix对象
-DenseMatrixItem[] array = new DenseMatrixItem[3] {
-    new DenseMatrixItem(1, 2, 1), new DenseMatrixItem(2, 2, 2), new DenseMatrixItem(1, 1, 3)
-};
+DenseMatrix resultd = new DenseMatrix(result);
+Console.WriteLine($"RowMax={resultd.RowMax},ColMax={resultd.ColMax}");
+Console.WriteLine(resultd.ValueString);
+// result:
+// [0 1 0 0 0 0 0 0 0;
+//  0 0 0 1 0 0 0 0 0;
+//  0 0 0 0 1 0 0 0 0;
+//  0 0 0 0 1 0 0 0 0;
+//  0 0 0 0 0 0 1 0 0;
+//  0 0 0 0 0 0 1 0 1;
+//  0 0 0 0 0 0 0 1 0;
+//  0 0 0 0 0 0 0 0 0;
+//  0 0 0 0 0 0 0 0 0]
 
-DenseMatrix dmt3 = new DenseMatrix(array); //通过数组的方式新建对象
-Console.WriteLine("dmt3=\n" + dmt3.ValueString);
-// dmt3=
+// 输出
+// RowMax=7,ColMax=9
 // [1 2 1;
-//  2 2 2;
-//  1 1 3]
-DenseMatrix dmt4 = dmt3; //直接引用
-Console.WriteLine("dmt4=\n" + dmt4.ValueString);
-// dmt4=
-// [1 2 1;
-//  2 2 2;
-//  1 1 3]
-DenseMatrix dmt5 = new DenseMatrix(dmt3); //复制对象
-Console.WriteLine("dmt5=\n" + dmt5.ValueString);
-// dmt5=
-// [1 2 1;
-//  2 2 2;
-//  1 1 3]
-
-// 更改值
-dmt3.Set(1, 1, 4);
-
-// 查看稠密矩阵中的值是否变化
-Console.WriteLine("dmt3=\n" + dmt3.ValueString);
-// dmt3=
-// [1 2 1;
-//  2 2 2;
-//  1 1 4]
-// (发生变化)
-Console.WriteLine("dmt4=\n" + dmt4.ValueString);
-// dmt4=
-// [1 2 1;
-//  2 2 2;
-//  1 1 4]
-// (发生变化)
-Console.WriteLine("dmt5=\n" + dmt5.ValueString);
-// dmt5=
-// [1 2 1;
-//  2 2 2;
-//  1 1 3]
-// (没有变化)
+//  2 4 1;
+//  3 5 1;
+//  4 5 1;
+//  5 7 1;
+//  6 7 1;
+//  6 9 1;
+//  7 8 1]
 ```
+当`result`矩阵中的0全为`double.PositiveInfinity`或其他值时，可以使用`baseNum`参数设置矩阵背景数值为指定值`double.PositiveInfinity`或其他值。
 
-在编写`DenseMatrix(DenseMatrix dmt)`的初始化方法时，发现使用`Value = new List(DenseMatrixItem)`也会映射到原来的`DenseMatrixItem`中，是由于`DenseMatrixItem`也是对象，没有进行深拷贝。所以只能通过`Set()`方法逐条新建添加记录。
+### 通过DenseMatrixItem的List创建DenseMatrix
+```C#
+List<DenseMatrixItem> list = new List<DenseMatrixItem>()
+{
+    new DenseMatrixItem(1, 2, 1),
+    new DenseMatrixItem(2, 2, 2),
+    new DenseMatrixItem(1, 1, 3)
+};
+DenseMatrix dmt = new DenseMatrix(list);
+Console.WriteLine(dmt.ValueString);
+// [1 2 1;
+//  2 2 2;
+//  1 1 3]
+```
 
 ## 矩阵的值修改
 ### 根本方法（编程理解）
@@ -343,3 +340,57 @@ Console.WriteLine(mt2.GetList(2).ToString()); // [1 1; 2 2; 3 1]
 | `Row`         | 实时获取并返回矩阵的行数                                                                        |
 | `Col`         | 实时获取并返回矩阵的列数                                                                        |
 | `ValueString` | 返回转化为Matlab格式的字符串的矩阵，如`[1 2;\n3 4]`（不需要换行符'\n'的版本可以使用ToString()） |
+
+# 附录
+## 矩阵复制实验
+在编写`DenseMatrix(DenseMatrix dmt)`的初始化方法时，发现使用`Value = new List(DenseMatrixItem)`也会映射到原来的`DenseMatrixItem`中，是由于`DenseMatrixItem`也是对象，没有进行深拷贝。所以只能通过`Set()`方法逐条新建添加记录。
+
+终于搞清楚这一部分了😂
+```C#
+// 创建DenseMatrixItem数组，通过这种方式创建DenseMatrix对象
+DenseMatrixItem[] array = new DenseMatrixItem[3] {
+    new DenseMatrixItem(1, 2, 1), new DenseMatrixItem(2, 2, 2), new DenseMatrixItem(1, 1, 3)
+};
+
+DenseMatrix dmt3 = new DenseMatrix(array); //通过数组的方式新建对象
+Console.WriteLine("dmt3=\n" + dmt3.ValueString);
+// dmt3=
+// [1 2 1;
+//  2 2 2;
+//  1 1 3]
+DenseMatrix dmt4 = dmt3; //直接引用
+Console.WriteLine("dmt4=\n" + dmt4.ValueString);
+// dmt4=
+// [1 2 1;
+//  2 2 2;
+//  1 1 3]
+DenseMatrix dmt5 = new DenseMatrix(dmt3); //复制对象
+Console.WriteLine("dmt5=\n" + dmt5.ValueString);
+// dmt5=
+// [1 2 1;
+//  2 2 2;
+//  1 1 3]
+
+// 更改值
+dmt3.Set(1, 1, 4);
+
+// 查看稠密矩阵中的值是否变化
+Console.WriteLine("dmt3=\n" + dmt3.ValueString);
+// dmt3=
+// [1 2 1;
+//  2 2 2;
+//  1 1 4]
+// (发生变化)
+Console.WriteLine("dmt4=\n" + dmt4.ValueString);
+// dmt4=
+// [1 2 1;
+//  2 2 2;
+//  1 1 4]
+// (发生变化)
+Console.WriteLine("dmt5=\n" + dmt5.ValueString);
+// dmt5=
+// [1 2 1;
+//  2 2 2;
+//  1 1 3]
+// (没有变化)
+```
