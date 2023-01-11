@@ -18,7 +18,7 @@ namespace CalCore.LP
         }
 
         /// <summary>
-        /// 优化启动器，返回迭代结果
+        /// 优化启动器，返回迭代结果。目标函数求最大，约束方程全为等式约束且均带有单位矩阵
         /// </summary>
         /// <param name="objFunc">目标函数数组</param>
         /// <param name="coeff">约束系数矩阵</param>
