@@ -17,6 +17,8 @@ string result2 = CalCore.Core.Calculate("4+(((1+2)*3)+(4*(2+2*(1+2)*2)*2+3)-10)*
 
 线性模型求解参考 [线性优化文档📄](./Documents/LP.md)
 
+数据处理部分参考 [数据处理文档📄](./Documents/Data.md)
+
 ## 🛠功能
 - 科学计算方式（加减乘除优先级）
 - 支持括号
