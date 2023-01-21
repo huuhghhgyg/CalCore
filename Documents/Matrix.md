@@ -19,6 +19,14 @@ Matrix mt = new Matrix(2, 3); //创建一个2行3列的矩阵
 //新建包含具体数值的矩阵
 Matrix mt1 = new Matrix(new double[,] { { 1, 2, 3 }, { 4, 5, 6 } }); //mt1:[1,2,3;4,5,6]
 Matrix mt2 = new Matrix(new double[,] { { 2, 1 }, { 3, 2 }, { 2, 4 } }); //mt2:[2,1;3,2;2,4]
+
+//通过string导入矩阵
+//string的格式类似Matlab的矩阵格式，但只接受","作为列分隔符，";"作为行分隔符
+Matrix mtstr = new Matrix("[1,2,3;4,5,6]");
+Console.WriteLine(mtstr.ValueString);
+// mtstr
+// [1 2 3;
+//  4 5 6]
 ```
 
 ### 根据原有矩阵/稠密矩阵创建新矩阵

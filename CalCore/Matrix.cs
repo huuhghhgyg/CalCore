@@ -93,6 +93,33 @@ namespace CalCore
             }
         }
 
+        public Matrix(string matrix)
+        {
+            matrix = matrix.TrimStart('[').TrimEnd(']');
+            //符号检验
+            if (matrix.IndexOf(',') < 0) throw new ArgumentException("没有检测到列分隔符");
+
+            //字符串分割
+            string[] rows = matrix.Split(';');
+            int row = rows.Length; //分割得到的行数
+            int col = rows[0].Count(c => c == ',') + 1; //逗号数+1
+
+            //数据正确性校验
+            if (matrix.Count(c => c == ';') != row - 1) throw new ArgumentException("行数错误：行分隔符\";\"个数错误");
+            if (matrix.Count(c => c == ',') != row * (col - 1)) throw new ArgumentException("列数错误：逗号分隔符\",\"个数错误");
+
+            Value = new double[row, col];
+
+            for (int i = 0; i < row; i++) //每行的处理
+            {
+                string[] c = rows[i].Split(',');
+                for (int j = 0; j < col; j++) //每列的处理
+                {
+                    Value[i, j] = double.Parse(c[j]);
+                }
+            }
+        }
+
         #region 对象属性
         /// <summary>
         /// 矩阵中存储的数值，为二维数组
