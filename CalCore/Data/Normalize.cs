@@ -117,12 +117,12 @@ namespace CalCore.Data
         {
             for(int i = 1; i <= matrix.Col; i++)
             {
-                Matrix mt = matrix.GetCol(i); //操作列的映射
+                Matrix mt = matrix.GetCol(i);
                 double max = mt.Max, min = mt.Min; //获取列的最大值和最小值
                 for(int j = 1; j < matrix.Row; i++)
                 {
-                    double val = (mt.Get(j, i)-min)/(max-min);
-                    mt.Set(j, i, val);
+                    double val = (matrix.Get(j, i)-min)/(max-min);
+                    matrix.Set(j, i, val);
                 }
             }
         }
