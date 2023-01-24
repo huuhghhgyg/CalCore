@@ -92,7 +92,22 @@ namespace CalCore
                 Value[item.Row - 1, item.Col - 1] = item.Value;
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="array"></param>
+        public Matrix(double[] array)
+        {
+            Value = new double[array.Length, 1];
+            for (int i = 0; i < array.Length; i++)
+                Value[i,0] = array[i];
+        }
 
+        /// <summary>
+        /// 使用MATLAB格式的字符串新建矩阵
+        /// </summary>
+        /// <param name="matrix">MATLAB格式的矩阵字符串</param>
+        /// <exception cref="ArgumentException">列分隔符异常</exception>
         public Matrix(string matrix)
         {
             matrix = matrix.TrimStart('[').TrimEnd(']');
@@ -316,7 +331,7 @@ namespace CalCore
 
         //此处其实可以引用GetSubMatrix，但是出于执行代码量考虑就重新写了
         /// <summary>
-        /// 从输入的矩阵中截取多行
+        /// 从输入的矩阵中截取多行，作为一个新矩阵返回。
         /// </summary>
         /// <param name="startRow">起始行</param>
         /// <param name="n">截取行数</param>
@@ -340,14 +355,14 @@ namespace CalCore
             else throw new ArgumentException("起始行的位置不存在");
         }
         /// <summary>
-        /// 截取某一行(row)
+        /// 截取某一行(row)，作为一个新矩阵返回。
         /// </summary>
         /// <param name="row">矩阵中行的编号</param>
         /// <returns></returns>
         public Matrix GetRow(int row) => GetRows(row, 1); //截取某一列
 
         /// <summary>
-        /// 从输入的矩阵中截取多列
+        /// 从输入的矩阵中截取多列，作为一个新矩阵返回。
         /// </summary>
         /// <param name="startCol">起始列</param>
         /// <param name="n">截取列数</param>
@@ -371,7 +386,7 @@ namespace CalCore
             else throw new ArgumentException("起始行的位置不存在");
         }
         /// <summary>
-        /// 截取某一列
+        /// 截取某一列，作为一个新矩阵返回。
         /// </summary>
         /// <param name="col">矩阵中列的编号</param>
         /// <returns></returns>

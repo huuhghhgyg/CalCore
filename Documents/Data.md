@@ -5,6 +5,9 @@ using CalCore.Data;
 ```
 
 # 指标标准化
+
+> Tips💡：当函数参数类型为`Matrix`时，由于`Marix`是类，输入函数的是映射的对象。因此，函数可以直接对映射进行操作从而直接对原矩阵进行修改，不需要返回值。
+
 ## 矩阵指标正向化
 本程序集支持将矩阵列指标正向化。常见的指标类型共有4种：
 | 指标名称   | 指标特点         | 例子                     |
@@ -25,8 +28,8 @@ using CalCore.Data;
 
 ### 从极小型指标转化
 ```c#
-NormalizeFromMin(Matrix matrix, int col)
-NormalizeFromMin(Matrix matrix, int[] cols)
+void NormalizeFromMin(Matrix matrix, int col);
+void NormalizeFromMin(Matrix matrix, int[] cols);
 ```
 | 参数     | 含义                                         |
 | -------- | -------------------------------------------- |
@@ -36,7 +39,7 @@ NormalizeFromMin(Matrix matrix, int[] cols)
 
 ### 从中间型指标转化
 ```c#
-NormalizeFromVal(Matrix matrix, double val, int col)
+void NormalizeFromVal(Matrix matrix, double val, int col)
 ```
 | 参数     | 含义                             |
 | -------- | -------------------------------- |
@@ -46,7 +49,7 @@ NormalizeFromVal(Matrix matrix, double val, int col)
 
 ### 从区间型指标转化
 ```c#
-NormalizeFromRange(Matrix matrix, double lb, double ub, int col)
+void NormalizeFromRange(Matrix matrix, double lb, double ub, int col);
 ```
 | 参数     | 含义                       |
 | -------- | -------------------------- |
@@ -60,17 +63,31 @@ NormalizeFromRange(Matrix matrix, double lb, double ub, int col)
 标准化后矩阵中的值都将落在[0,1]的区间内，同时消去各指标量纲(计量单位不同对于得分大小)的影响。
 由于这种标准化方法使用了平方求和再开方的方法，因此不适用于处理含有负数的数据。
 ```c#
-Normalize.Standardize(Matrix matrix)
+void Normalize.Standardize(Matrix matrix);
 ```
 `matrix`为需要标准化并消除量纲影响的矩阵。默认其中行数为样本数，列数为指标数。
 
 以下方法适用于处理含有负数的数据，将其映射到[0,1]区间
 ```c#
-StandardizeNegative(Matrix matrix)
+void StandardizeNegative(Matrix matrix);
 ```
 `matrix`含义同上。
 
-## 完整示例
+# 数据评价
+程序集中目前支持计算优劣解距离法(TOPSIS)的得分。
+
+## TOPSIS评分
+输入进行过指标正向化和标准化的矩阵，将返回一个`double[]`类型的数组，表示每个样本的得分。
+```c#
+double[] Evaluation.TOPSIS_Score(Matrix matrix, [double[] weight])
+```
+| 参数     | 含义                                         |
+| -------- | -------------------------------------------- |
+| `matrix` | 指标矩阵。每行表示一个样本，每列表示一个指标 |
+| `weight` | 权重数组，要求其长度和指标矩阵的列数相同     |
+
+
+# 完整示例
 此部分示例包括[矩阵指标正向化](#矩阵指标正向化)和[标准化矩阵](#标准化矩阵)两部分内容。
 ```c#
 // 创建矩阵
@@ -88,4 +105,8 @@ Normalize.Standardize(mt1);
 
 // 输出矩阵
 Console.WriteLine(mt1.ValueString);
+
+// 输出归一化后的得分
+double[] scores = Evaluation.TOPSIS_Score(mt1);
+Console.WriteLine(new Matrix(scores).ValueString);
 ```
