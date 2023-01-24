@@ -8,9 +8,9 @@ namespace CalCore.Data
     public static class Evaluation
     {
         /// <summary>
-        /// 输入进行过指标正向化和标准化的矩阵，返回所有样本的得分。
+        /// 输入进行过指标正向化和标准化的矩阵，通过TOPSIS法返回所有样本的得分。
         /// </summary>
-        /// <param name="matrix">指标矩阵</param>
+        /// <param name="matrix">指标矩阵，此函数中只读</param>
         /// <param name="weight">权重数组，要求其长度和指标矩阵的列数相同</param>
         /// <returns>矩阵样本的得分数组</returns>
         /// <exception cref="ArgumentException">输入权重错误</exception>
@@ -72,12 +72,61 @@ namespace CalCore.Data
             //归一化
             double scoreSum = 0;
             foreach (double val in scores) scoreSum += val; //求和
-            for(int i = 0; i < scores.Length; i++)
+            for (int i = 0; i < scores.Length; i++)
             {
                 scores[i] /= scoreSum;
             }
 
             return scores;
+        }
+
+        /// <summary>
+        /// 输入进行过指标正向化和标准化的矩阵，通过熵权法返回指标的权重。
+        /// </summary>
+        /// <param name="matrix">指标矩阵，此函数中只读</param>
+        /// <returns>熵权法得到的指标权重数组</returns>
+        public static double[] EntropyWeight(Matrix matrix)
+        {
+            int n = matrix.Row; //评价对象个数
+            double[] d = new double[matrix.Col]; //信息效用
+
+            //计算概率矩阵
+            for (int i = 0; i < matrix.Col; i++)
+            {
+                Matrix mat = matrix.GetCol(i + 1);
+                double sum = mat.Sum; //列之和，列概率分母
+
+                double esum = 0; //概率和 p*ln(p)
+                for (int j = 0; j < matrix.Row; j++)
+                {
+                    double p = matrix.Value[j, i] / sum; //计算概率
+                    esum += p * (p == 0 ? 0 : Math.Log(p));
+                }
+                esum /= -Math.Log(n);
+
+                d[i] = 1 - esum; //信息效用 dj=1-ej
+            }
+
+            //指标归一化，得到熵权
+            double dsum = 0;
+            foreach (double val in d) dsum += val;
+            for (int i = 0; i < d.Length; i++)
+            {
+                d[i] /= dsum;
+            }
+
+            return d;
+        }
+        /// <summary>
+        /// 输入进行过指标正向化和标准化的矩阵，使用熵权法对生成TOPSIS模型的权重
+        /// 基于熵权法对TOPSIS模型的修正
+        /// </summary>
+        /// <param name="matrix">指标矩阵，此函数中只读</param>
+        /// <returns>基于熵权法权重对TOPSIS模型的修正得分</returns>
+        public static double[] TOPSIS_Entropy(Matrix matrix)
+        {
+            double[] weight = EntropyWeight(matrix);
+            return TOPSIS_Score(matrix, weight);
         }
     }
 }

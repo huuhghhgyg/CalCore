@@ -74,7 +74,7 @@ void StandardizeNegative(Matrix matrix);
 `matrix`含义同上。
 
 # 数据评价
-程序集中目前支持计算优劣解距离法(TOPSIS)的得分。
+程序集中目前支持计算优劣解距离法(TOPSIS)的得分、熵权法求权重和基于熵权法对TOPSIS的修正模型。
 
 ## TOPSIS评分
 输入进行过指标正向化和标准化的矩阵，将返回一个`double[]`类型的数组，表示每个样本的得分。
@@ -86,6 +86,28 @@ double[] Evaluation.TOPSIS_Score(Matrix matrix, [double[] weight])
 | `matrix` | 指标矩阵。每行表示一个样本，每列表示一个指标 |
 | `weight` | 权重数组，要求其长度和指标矩阵的列数相同     |
 
+## 熵权法
+输入进行过指标正向化和标准化的矩阵，通过熵权法返回一个`double[]`类型的数组，表示指标的权重。
+```c#
+double[] Evaluation.EntropyWeight(Matrix matrix)
+```
+参数`matrix`含义同上。
+
+### 示例
+```c#
+// mt1为进行过指标正向化和标准化的矩阵
+double[] weight = Evaluation.EntropyWeight(mt1);
+Console.WriteLine(new Matrix(weight).ValueString);
+```
+
+## 基于熵权法对TOPSIS的修正模型
+输入进行过指标正向化和标准化的矩阵，使用熵权法对生成TOPSIS模型的权重。是基于熵权法对TOPSIS模型的修正。
+
+名字听着很🐂，其实就是用熵权法求出的权重放到TOPSIS模型里面使用。这个修正模型的主要产物是熵权法，而其主要实现只是依次使用了熵权法和TOPSIS😂
+```c#
+double[] Evaluation.TOPSIS_Entropy(Matrix matrix)
+```
+参数`matrix`含义同上。
 
 # 完整示例
 此部分示例包括[矩阵指标正向化](#矩阵指标正向化)和[标准化矩阵](#标准化矩阵)两部分内容。
