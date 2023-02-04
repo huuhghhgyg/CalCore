@@ -26,7 +26,7 @@ namespace CalCore.LP
         /// <param name="maxIterate">最大迭代次数</param>
         /// <param name="sig">初始检验数行</param>
         /// <returns>迭代结果，SimplexItem对象，可用于下次迭代</returns>
-        public static SimplexItem Optimize(double[] objFunc, Matrix coeff, int isMax = 1, double maxIterate = double.PositiveInfinity, double[] sig = null)
+        public static SimplexItem Optimize(double[] objFunc, Matrix coeff, int isMax = 1, uint? maxIterate = null, double[] sig = null)
         {
             // Initialize
             int rows = coeff.Row, cols = coeff.Col; //设置行列数
@@ -55,6 +55,7 @@ namespace CalCore.LP
 
             // print
             Console.WriteLine("初始化");
+            Console.WriteLine(new Matrix(objFunc).T().ValueString);
             Console.WriteLine(item.Sig.ValueString);
             Console.WriteLine(item.Coeff.ValueString);
 
@@ -62,7 +63,8 @@ namespace CalCore.LP
             Console.WriteLine("\n开始迭代：");
             int count = 0;
             IterateState state = IterateState.Success; //默认值
-            while (item.Sig.Min < 0 && state == 0 && count++ < maxIterate) //只要有值小于0，就继续迭代
+            while (item.Sig.Min < 0 && state == 0 &&
+                count++ < (maxIterate ?? double.PositiveInfinity)) //只要有值小于0，就继续迭代
             {
                 Console.WriteLine($"\n迭代{count}：");
                 state = Iterate(item, isMax);
