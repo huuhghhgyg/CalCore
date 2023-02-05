@@ -26,9 +26,9 @@ namespace CalCore.LP
             //复制目标函数
             Array.Copy(objFunction, objFunc, objFunction.Length);
 
-            //改变目标函数符号
-            if (type == Target.min)
-                for (int i = 0; i < objFunc.Length; i++) objFunc[i] *= -1;
+            ////改变目标函数符号
+            //if (type == Target.min)
+            //    for (int i = 0; i < objFunc.Length; i++) objFunc[i] *= -1;
         }
 
         #region 属性
@@ -154,7 +154,7 @@ namespace CalCore.LP
                 {
                     if (constraints[i].sym == Symbol.EQ)
                     {
-                        eqConsIndex[objFunc.Length + i] = -1; //==需要预求解
+                        eqConsIndex[objFunc.Length + i] = 1; //==需要预求解
                         eqNum++;
                     }
                     cons.Value[i, objFunc.Length + i] = 1; //添加平衡变量(<=或==)
@@ -178,13 +178,13 @@ namespace CalCore.LP
         private IterateState SolveFirstStage(ref Matrix cons, ref int geNum, ref int eqNum, int[] eqConsIndex)
         {
             //发送第一阶段的求解
-            if (geNum > 0 || eqNum > 0) //出现>=和==的时候需要预求解
+            if (geNum > 0 || eqNum > 0) //出现>=和==的时候需要预求解。由于==号加入的为辅助变量，因此也需要出基。
             {
                 Console.WriteLine($"准备发送第一阶段的求解矩阵：\n{cons.ValueString}");
                 double[] objFuncS1 = new double[cons.Col - 1];
-                //目标函数求min,-1
+                //目标函数求min
                 for (int i = objFunc.Length + constraints.Count; i < cons.Col - 1; i++) //设置第一阶段求解的目标函数
-                    objFuncS1[i] = -1;
+                    objFuncS1[i] = 1;
                 Array.Copy(eqConsIndex, objFuncS1, eqConsIndex.Length); //复制==辅助变量的位置
 
                 int[] baseNums = new int[constraints.Count]; //找到每行的基变量
@@ -193,16 +193,15 @@ namespace CalCore.LP
                 //处理Sig
                 //int[] aidBaseNumI = new int[geNum]; //辅助变量的基变量行号
                 double[] sig = new double[cons.Col - 1];
-                for (int k = 0; k < cons.Col - 1; k++) sig[k] += objFuncS1[k];
-                for (int i = 0, j = 0; j < geNum; i++) //填充辅助变量列表
+                for (int i = 0; i < cons.Col - 1; i++)
                 {
-                    if (baseNums[i] > objFunc.Length + constraints.Count)
+                    sig[i] = -objFuncS1[i]; //-C
+                    for (int j = 0; j < cons.Row; j++)
                     {
-                        //aidBaseNumI[j++] = i; //填充行号
-                        j++;
-                        for (int k = 0; k < cons.Col - 1; k++) sig[k] += cons.Value[i, k];
+                        sig[i] += objFuncS1[baseNums[j] - 1] * cons.Value[j, i]; //CB.*A-C计算检验数
                     }
                 }
+
                 Simplex.SimplexItem simplexItem0 = Simplex.Optimize(objFuncS1, cons, -1, maxIterate, sig);
 
                 //返回结果
@@ -244,13 +243,14 @@ namespace CalCore.LP
 
             //发送求解
             //debug
-            Console.WriteLine("发送求解：");
+            Console.WriteLine("发送求解的目标函数和约束方程：");
             Matrix objfmtx = new Matrix(1, objFuncCoeff.Length);
             for (int i = 0; i < objFuncCoeff.Length; i++) objfmtx.Value[0, i] = objFuncCoeff[i];
-            Console.WriteLine(objfmtx.ValueString);
+            Console.WriteLine($"{objfmtx.ValueString}");
             Console.WriteLine(cons.ValueString);
 
-            Simplex.SimplexItem simplexItem = Simplex.Optimize(objFuncCoeff, cons, 1, maxIterate);
+            int isMax = type == Target.max ? 1 : -1; //确定迭代系数
+            Simplex.SimplexItem simplexItem = Simplex.Optimize(objFuncCoeff, cons, isMax, maxIterate);
 
             if (simplexItem == null || simplexItem.resultArr == null)
             {
@@ -258,7 +258,7 @@ namespace CalCore.LP
             }
             else
             {
-                Console.WriteLine($"最优值RHS={simplexItem.RHS * (type == Target.min ? -1 : 1)}");
+                Console.WriteLine($"最优值RHS={simplexItem.RHS}");
                 Console.WriteLine($"解向量：\n{simplexItem.resultArr.ValueString}");
             }
         }

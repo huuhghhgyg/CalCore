@@ -156,7 +156,7 @@ namespace CalCore
         /// </summary>
         public string ValueString
         {
-            get => ToString().Replace(";", ";\n ");
+            get => ToString().Replace(' ','\t').Replace(";", ";\n ");
         }
 
         /// <summary>
