@@ -25,10 +25,6 @@ namespace CalCore.LP
 
             //复制目标函数
             Array.Copy(objFunction, objFunc, objFunction.Length);
-
-            ////改变目标函数符号
-            //if (type == Target.min)
-            //    for (int i = 0; i < objFunc.Length; i++) objFunc[i] *= -1;
         }
 
         #region 属性

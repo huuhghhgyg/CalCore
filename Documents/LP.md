@@ -83,15 +83,15 @@ lp.Solve(100);
 
 `Simplex.Optimize()`函数用法如下：
 ```C#
-Optimize(double[] objFunc, Matrix coeff, [int isMax], [double maxIterate], [double[] sig])
+Optimize(double[] objFunc, Matrix coeff, [int isMax], [uint? maxIterate], [double[] sig])
 ```
-| 参数         | 解释                                              |
-| ------------ | ------------------------------------------------- |
-| `objFunc`    | 目标函数数组                                      |
-| `coeff`      | 约束系数矩阵，包括右端项                          |
-| `isMax`      | 可选，是否求最大。默认求最大，值为1；求最小设为-1 |
-| `maxIterate` | 可选，最大迭代次数                                |
-| `sig`        | 可选，初始检验数行                                |
+| 参数         | 解释                                                 |
+| ------------ | ---------------------------------------------------- |
+| `objFunc`    | 目标函数数组                                         |
+| `coeff`      | 约束系数矩阵，包括右端项                             |
+| `isMax`      | 可选，是否求最大。默认求最大，值为1；求最小设为-1    |
+| `maxIterate` | 可选，最大迭代次数。不输入时默认值为null，不进行限制 |
+| `sig`        | 可选，初始检验数行                                   |
 
 `Optimize`函数执行完毕后将返回一个`SimplexItem`对象。如果求解失败，返回值将为`null`。
 

@@ -53,22 +53,6 @@ namespace CalCore.LP
             item.Coeff = new Matrix(coeff); //初始化约束方程矩阵
             item.BaseNum = new int[rows]; //初始化基变量对象
 
-            // 初始化Sig值，判断初始是否最优
-            //if (sig == null)
-            //{
-            //    //这种情况适用于基变量的目标函数系数为0，直接取负号得到检验数
-            //    item.Sig = new Matrix(1, objFunc.Length);
-            //    for (int i = 0; i < objFunc.Length; i++)
-            //    {
-            //        item.Sig.Value[0, i] = -objFunc[i];
-            //        for(int j = 0; j < coeff.Row; j++)
-            //        {
-            //            item.Sig.Value[0, i]+=...
-            //        }
-            //    }
-            //}
-            //else
-
             item.Sig = new Matrix(1, objFunc.Length); //初始化
             if (sig != null) //判断是否输入
             {
@@ -185,7 +169,11 @@ namespace CalCore.LP
             }
         }
 
-        internal static void UpdateSigma(SimplexItem item)
+        /// <summary>
+        /// 根据SimplexItem的信息更新Sigma值
+        /// </summary>
+        /// <param name="item">要更新Sigma值的SimplexItem对象</param>
+        private static void UpdateSigma(SimplexItem item)
         {
             item.BaseNum = new int[item.Coeff.Col - 1];
             GetRowBV(item.Coeff, item.BaseNum);
@@ -200,7 +188,6 @@ namespace CalCore.LP
                     item.Sig.Value[0, i] += item.ObjFunc[item.BaseNum[j] - 1] * item.Coeff.Value[j, i]; //CB.*A-C计算检验数
                 }
             }
-
         }
 
         /// <summary>
@@ -229,7 +216,7 @@ namespace CalCore.LP
                     minSig = sig.Get(1, i) * coeff;
                     minSigCol = i;
                 }
-            Console.WriteLine($"最{(coeff == 1 ? "小" : "大")}Sig值为{minSig * coeff},在第{minSigCol}列,Sig:\n{sig.ValueString}");
+            //Console.WriteLine($"最{(coeff == 1 ? "小" : "大")}Sig值为{minSig * coeff},在第{minSigCol}列,Sig:\n{sig.ValueString}");
 
             // 计算比值，得到最小比值项，对应变量进基
             // 最小theta值为{theta[minThetaRow - 1]},
@@ -240,7 +227,7 @@ namespace CalCore.LP
             for (int i = 1; i <= rows; i++)
             {
                 theta[i - 1] = cmt.Get(i, cols) / cmt.Get(i, minSigCol); //b/a （当被除数为0，计算为正无穷）
-                Console.WriteLine($"theta({i})={cmt.Get(i, cols)}/{cmt.Get(i, minSigCol)}={theta[i - 1]}");
+                //Console.WriteLine($"theta({i})={cmt.Get(i, cols)}/{cmt.Get(i, minSigCol)}={theta[i - 1]}");
                 if (theta[i - 1] < 0) theta[i - 1] = double.PositiveInfinity; //不允许存在负数（设置为正无穷）
                 if (theta[i - 1] < theta[minThetaRow - 1]) minThetaRow = i;
             }
@@ -249,7 +236,7 @@ namespace CalCore.LP
                 Console.WriteLine("目标函数值在此约束下无界");
                 return IterateState.Unbounded; //最小theta值为正无穷，找不到出基变量，无界解。
             }
-            Console.WriteLine($"最小theta值为{theta[minThetaRow - 1]},对应行为{minThetaRow},对应出基变量为X{item.BaseNum[minThetaRow - 1]},此行系数计算后应为1");
+            //Console.WriteLine($"最小theta值为{theta[minThetaRow - 1]},对应行为{minThetaRow},对应出基变量为X{item.BaseNum[minThetaRow - 1]},此行系数计算后应为1");
 
 
             // 对应变量出基
