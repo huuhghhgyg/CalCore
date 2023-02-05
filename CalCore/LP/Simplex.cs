@@ -10,7 +10,7 @@ namespace CalCore.LP
         public class SimplexItem
         {
             public double[] ObjFunc { get; set; } //目标函数向量
-            public Matrix Sig { get; set; } //目标函数标准型
+            public double[] Sig { get; set; } //目标函数标准型
             public bool SigUpdate { get; set; } = true; //是否跳过更新检验数行
             public Matrix Coeff { get; set; } //约束方程矩阵
             public double RHS { get; set; } //最优值
@@ -25,9 +25,9 @@ namespace CalCore.LP
         /// <param name="sigma">Sigma矩阵</param>
         /// <param name="coeff">求max=1，求min=-1</param>
         /// <returns></returns>
-        private static double SigmaExtreme(Matrix sigma, int coeff)
+        private static double SigmaExtreme(double[] sigma, int coeff)
         {
-            return coeff == 1 ? sigma.Min : sigma.Max;
+            return coeff == 1 ? sigma.Min() : sigma.Max();
         }
 
         /// <summary>
@@ -53,11 +53,11 @@ namespace CalCore.LP
             item.Coeff = new Matrix(coeff); //初始化约束方程矩阵
             item.BaseNum = new int[rows]; //初始化基变量对象
 
-            item.Sig = new Matrix(1, objFunc.Length); //初始化
+            item.Sig = new double[objFunc.Length]; //初始化
             if (sig != null) //判断是否输入
             {
                 for (int i = 0; i < sig.Length; i++) //复制sig值
-                    item.Sig.Value[0, i] = sig[i];
+                    item.Sig[i] = sig[i];
             }
             else
             {
@@ -67,7 +67,7 @@ namespace CalCore.LP
             // print
             Console.WriteLine("初始化");
             Console.WriteLine(new Matrix(objFunc).T().ValueString);
-            Console.WriteLine(item.Sig.ValueString);
+            Console.WriteLine(Format.ArrayString(item.Sig));
             Console.WriteLine(item.Coeff.ValueString);
 
             // 迭代循环
@@ -90,7 +90,7 @@ namespace CalCore.LP
             else msg = "超过最大迭代次数";
 
             Console.WriteLine("\n结束原因：" + msg);
-            Console.WriteLine(item.Sig.ValueString);
+            Console.WriteLine(Format.ArrayString(item.Sig));
             Console.WriteLine(item.Coeff.ValueString);
 
             if (state != IterateState.Success)
@@ -182,10 +182,10 @@ namespace CalCore.LP
             //int[] aidBaseNumI = new int[geNum]; //辅助变量的基变量行号
             for (int i = 0; i < item.Coeff.Col - 1; i++)
             {
-                item.Sig.Value[0, i] = -item.ObjFunc[i];
+                item.Sig[i] = -item.ObjFunc[i];
                 for (int j = 0; j < item.Coeff.Row; j++)
                 {
-                    item.Sig.Value[0, i] += item.ObjFunc[item.BaseNum[j] - 1] * item.Coeff.Value[j, i]; //CB.*A-C计算检验数
+                    item.Sig[i] += item.ObjFunc[item.BaseNum[j] - 1] * item.Coeff.Value[j, i]; //CB.*A-C计算检验数
                 }
             }
         }
@@ -198,25 +198,23 @@ namespace CalCore.LP
         /// <returns>迭代状态对象</returns>
         public static IterateState Iterate(SimplexItem item, int coeff = 1)
         {
-            Console.WriteLine($"输入值:\n{item.Sig.ValueString}\n{item.Coeff.ValueString}");
+            Console.WriteLine($"输入值:\n{Format.ArrayString(item.Sig)}\n{item.Coeff.ValueString}");
 
             int rows = item.Coeff.Row;
             int cols = item.Coeff.Col;
             Matrix cmt = item.Coeff;
-            Matrix sig = item.Sig;
-
 
             // 找到最小/大的Sigma值对应的列
             // 最小/大Sigma值为{minSig},在第{minSigCol}列
             int minSigCol = 1;
-            double minSig = sig.Value[0, 0] * coeff;
-            for (int i = 1; i < cols; i++)
-                if (sig.Get(1, i) * coeff < minSig)
+            double minSig = item.Sig[0] * coeff;
+            for (int i = 0; i < cols - 1; i++)
+                if (item.Sig[i] * coeff < minSig)
                 {
-                    minSig = sig.Get(1, i) * coeff;
-                    minSigCol = i;
+                    minSig = item.Sig[i] * coeff;
+                    minSigCol = i + 1;
                 }
-            //Console.WriteLine($"最{(coeff == 1 ? "小" : "大")}Sig值为{minSig * coeff},在第{minSigCol}列,Sig:\n{sig.ValueString}");
+            Console.WriteLine($"最{(coeff == 1 ? "小" : "大")}Sig值为{minSig * coeff},在第{minSigCol}列,Sig:\n{Format.ArrayString(item.Sig)}");
 
             // 计算比值，得到最小比值项，对应变量进基
             // 最小theta值为{theta[minThetaRow - 1]},
@@ -280,16 +278,7 @@ namespace CalCore.LP
             // 更新检验数行
             if (item.SigUpdate)
             {
-                for (int i = 0; i < cols - 1; i++) //逐列计算检验数Sig
-                {
-                    double sigI = -item.ObjFunc[i];
-                    for (int j = 0; j < rows; j++) //遍历行
-                    {
-                        sigI += objFuncCoeff[j] * cmt.Get(j + 1, i + 1);
-                    }
-                    //Console.WriteLine($"列{i + 1}检验数为{sigI}");
-                    item.Sig.Value[0, i] = sigI;
-                }
+                UpdateSigma(item);
             }
             else item.SigUpdate = true; //重新打开更新检验行的设置
 
