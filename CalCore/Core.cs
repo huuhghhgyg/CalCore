@@ -16,18 +16,18 @@ namespace CalCore
                 //有括号
                 formula = RemoveBrackets(formula);//移除括号
             }
-            if (formula.IndexOf("*") != -1)
+            if (formula.IndexOf("*") != -1 || formula.IndexOf("/") != -1)
             {
-                //涉及乘法
+                //涉及乘法和除法
                 formula = MultiplyToPlus(formula);
             }
             return lowCal(formula);//进行最后的加减法运算
         }
         private static string calUnderMultiply(string formula) // 返回乘法及以下的结果
         {
-            if (formula.IndexOf("*") != -1)
+            if (formula.IndexOf("*") != -1 || formula.IndexOf("/") != -1)
             {
-                //涉及乘法
+                //涉及乘法和除法
                 formula = MultiplyToPlus(formula);
             }
             return lowCal(formula);//进行最后的加减法运算
