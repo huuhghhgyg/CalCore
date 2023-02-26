@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace CalCore
@@ -111,6 +112,8 @@ namespace CalCore
         public Matrix(string matrix)
         {
             matrix = matrix.TrimStart('[').TrimEnd(']');
+            matrix = Regex.Replace(matrix, @"(\s|\t)*;(\s|\t)*", ";"); //兼容空格分割
+            matrix = Regex.Replace(matrix, @"(\s|\t)+", ","); //兼容空格分割
             //符号检验
             if (matrix.IndexOf(',') < 0) throw new ArgumentException("没有检测到列分隔符");
 
