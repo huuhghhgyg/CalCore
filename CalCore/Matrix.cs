@@ -124,7 +124,7 @@ namespace CalCore
 
             //数据正确性校验
             if (matrix.Count(c => c == ';') != row - 1) throw new ArgumentException("行数错误：行分隔符\";\"个数错误");
-            if (matrix.Count(c => c == ',') != row * (col - 1)) throw new ArgumentException("列数错误：逗号分隔符\",\"个数错误");
+            if (matrix.Count(c => c == ',') != row * (col - 1)) throw new ArgumentException("列数错误：分隔符(逗号或空格)个数错误");
 
             Value = new double[row, col];
 
