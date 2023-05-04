@@ -111,8 +111,11 @@ namespace CalCore.LP
             switch (sym)
             {
                 case "<=": return 0;
+                case "≤": return 0;
                 case "==": return 1;
+                case "=": return 1;
                 case ">=": return 2;
+                case "≥": return 2;
                 default: return -1; //未识别
             }
         }
@@ -224,14 +227,23 @@ namespace CalCore.LP
         /// 对LP对象进行求解
         /// </summary>
         /// <param name="maxIterate">最大迭代数</param>
-        public void Solve(uint? maxIterate = null)
+        public string Solve(uint? maxIterate = null)
         {
+            //迭代前的合规性检查
+            //每个constraints长度与目标函数长度一致
+            for(int i = 0; i < constraints.Count; i++)
+            //foreach(LPBuilderItem item in constraints)
+            {
+                if (constraints[i].coeff.Length != objFunc.Length)
+                    throw new ArgumentException($"第{i + 1}个约束方程系数个数（{constraints[i].coeff.Length}）与目标函数（{objFunc.Length}）不一致");
+            }
+
             this.maxIterate = maxIterate; //设置迭代次数上限
 
             //标准化矩阵，并检测是否需要进行第一阶段求解
             Matrix cons = StandardizeConstraints();
 
-            if (cons == null) return; //信息被截留，求解停止 
+            if (cons == null) return "第一阶段处理失败，求解停止"; //信息被截留，求解停止 
 
             //设置目标函数
             double[] objFuncCoeff = new double[cons.Col - 1];
@@ -248,15 +260,14 @@ namespace CalCore.LP
             int isMax = type == Target.max ? 1 : -1; //确定迭代系数
             Simplex.SimplexItem simplexItem = Simplex.Optimize(objFuncCoeff, cons, isMax, maxIterate);
 
+            string output;
             if (simplexItem == null || simplexItem.resultArr == null)
-            {
-                Console.WriteLine("求解失败");
-            }
+                output = "求解失败";
             else
-            {
-                Console.WriteLine($"最优值RHS={simplexItem.RHS}");
-                Console.WriteLine($"解向量：\n{simplexItem.resultArr.ValueString}");
-            }
+                output = $"最优值RHS={simplexItem.RHS}\n解向量：\n{simplexItem.resultArr.ValueString}\nSigma：\n{new Matrix(simplexItem.Sig).T().ValueString}";
+
+            Console.WriteLine(output);
+            return output;
         }
         #endregion
     }
