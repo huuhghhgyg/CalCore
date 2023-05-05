@@ -202,6 +202,10 @@ namespace CalCore.LP
                 }
 
                 Simplex.SimplexItem simplexItem0 = Simplex.Optimize(objFuncS1, cons, -1, maxIterate, sig);
+                if (simplexItem0.State != IterateState.Success)
+                {
+                    Console.WriteLine($"求解失败：\n{simplexItem0.Sig}\n{simplexItem0.Coeff}");
+                }
 
                 //返回结果
                 Console.WriteLine($"第一阶段求解值={simplexItem0.RHS},第一阶段{(simplexItem0.RHS == 0 ? "有最优解" : "无最优解")}");
@@ -214,7 +218,7 @@ namespace CalCore.LP
                 //将迭代得到的系数直接嵌入矩阵中
                 //其中会包含最后一列，为预留的b列空间
                 Matrix coeff0 = simplexItem0.Coeff; //映射方便操作
-                cons = new Matrix(coeff0.GetCols(1, objFunc.Length + constraints.Count + 1));
+                cons = new Matrix(coeff0.GetCols(1, objFunc.Length + constraints.Count + 1)); //目标函数长度 + 非等号约束长度 + b列预留
                 //填入b值
                 for (int i = 1; i <= cons.Row; i++)
                     cons.Set(i, cons.Col, coeff0.Get(i, coeff0.Col));
@@ -231,7 +235,7 @@ namespace CalCore.LP
         {
             //迭代前的合规性检查
             //每个constraints长度与目标函数长度一致
-            for(int i = 0; i < constraints.Count; i++)
+            for (int i = 0; i < constraints.Count; i++)
             //foreach(LPBuilderItem item in constraints)
             {
                 if (constraints[i].coeff.Length != objFunc.Length)
@@ -261,10 +265,14 @@ namespace CalCore.LP
             Simplex.SimplexItem simplexItem = Simplex.Optimize(objFuncCoeff, cons, isMax, maxIterate);
 
             string output;
-            if (simplexItem == null || simplexItem.resultArr == null)
+            if (simplexItem == null || simplexItem.ResultArr == null)
                 output = "求解失败";
             else
-                output = $"最优值RHS={simplexItem.RHS}\n解向量：\n{simplexItem.resultArr.ValueString}\nSigma：\n{new Matrix(simplexItem.Sig).T().ValueString}";
+            {
+                output = $"最优值RHS={simplexItem.RHS}\n";
+                output += $"解向量：\n{simplexItem.ResultArr.ValueString}\nSigma：\n{new Matrix(simplexItem.Sig).T().ValueString}\n";
+                output += $"迭代次数：{simplexItem.IterateNum}";
+            }
 
             Console.WriteLine(output);
             return output;

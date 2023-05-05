@@ -16,7 +16,9 @@ namespace CalCore.LP
             public double RHS { get; set; } //最优值
             public int[] RowObjFuncCoeff { get; set; } //行目标函数系数
             public int[] BaseNum { get; set; } //基变量
-            public Matrix resultArr { get; set; } //解向量
+            public Matrix ResultArr { get; set; } //解向量
+            public int IterateNum { get; set; } = 0; //迭代次数
+            public IterateState State { get; set; }//迭代状态
         }
 
         /// <summary>
@@ -72,14 +74,13 @@ namespace CalCore.LP
 
             // 迭代循环
             Console.WriteLine("\n开始迭代：");
-            int count = 0;
             IterateState state = IterateState.Success; //默认值
 
             while (SigmaExtreme(item.Sig, isMax) * isMax < 0 &&
                 state == 0 &&
-                count++ < (maxIterate ?? double.PositiveInfinity)) //只要有值小于0，就继续迭代
+                item.IterateNum++ < (maxIterate ?? double.PositiveInfinity)) //只要有值小于0，就继续迭代
             {
-                Console.WriteLine($"\n迭代{count}：");
+                Console.WriteLine($"\n迭代{item.IterateNum}：");
                 state = Iterate(item, isMax);
                 Console.WriteLine($"RHS={item.RHS}");
             }
@@ -94,7 +95,7 @@ namespace CalCore.LP
             Console.WriteLine(item.Coeff.ValueString);
 
             if (state != IterateState.Success)
-                return null; //求解失败
+                return item; //求解失败
             else
             {
                 //Console.WriteLine("最优值：" + item.RHS);
@@ -108,7 +109,7 @@ namespace CalCore.LP
                 {
                     result.Set(1, baseNum[i], item.Coeff.Value[i, cols - 1]);
                 }
-                item.resultArr = result;
+                item.ResultArr = result;
                 //Console.WriteLine("解向量：\n" + result.ValueString);
 
                 //获取行对应变量
@@ -147,7 +148,7 @@ namespace CalCore.LP
                 bool baseFound = false;
                 for (int j = cols - 1; j > 0 && !baseFound; j--) //遍历每列（倒序）
                 {
-                    if (cmt.Get(i, j) == 1) //目标值为1
+                    if (cmt.Get(i, j) == 1 || cmt.Get(i, j) == -1) //目标值为1或-1
                     {
                         //找其他行是否都为0
                         int k;
@@ -160,6 +161,8 @@ namespace CalCore.LP
                         }
                         if (k == rows + 1) //如果行扫描完毕
                         {
+                            if (cmt.Get(i, j) == -1) MatrixRowDivide(cmt, -1, i); //如果为-1，行除以-1
+
                             baseFound = true;
                             baseNum[i - 1] = j;
                             //Console.WriteLine($"行{i}的基变量为X{j}");
@@ -167,6 +170,11 @@ namespace CalCore.LP
                     }
                 }
             }
+        }
+
+        static void MatrixRowDivide(Matrix mt, double divideVal, int row)
+        {
+            for (int j = 0; j < mt.Col; j++) mt.Value[row - 1, j] = mt.Value[row - 1, j] / divideVal;
         }
 
         /// <summary>
@@ -227,18 +235,20 @@ namespace CalCore.LP
                 theta[i - 1] = cmt.Get(i, cols) / cmt.Get(i, minSigCol); //b/a （当被除数为0，计算为正无穷）
                 //Console.WriteLine($"theta({i})={cmt.Get(i, cols)}/{cmt.Get(i, minSigCol)}={theta[i - 1]}");
                 if (theta[i - 1] < 0) theta[i - 1] = double.PositiveInfinity; //不允许存在负数（设置为正无穷）
-                if (theta[i - 1] < theta[minThetaRow - 1]) minThetaRow = i;
+                if ((!double.IsNaN(theta[i - 1]) && theta[i - 1] < theta[minThetaRow - 1] || double.IsNaN(theta[minThetaRow - 1]))
+                    && cmt.Get(i, minSigCol) != 0) //不允许theta为NaN，不允许操作数为0，否则下次计算会造成混乱
+                    minThetaRow = i;
             }
             if (theta[minThetaRow - 1] == double.PositiveInfinity)
             {
                 Console.WriteLine("目标函数值在此约束下无界");
                 return IterateState.Unbounded; //最小theta值为正无穷，找不到出基变量，无界解。
             }
-            //Console.WriteLine($"最小theta值为{theta[minThetaRow - 1]},对应行为{minThetaRow},对应出基变量为X{item.BaseNum[minThetaRow - 1]},此行系数计算后应为1");
+            Console.WriteLine($"最小theta值为{theta[minThetaRow - 1]},对应行为{minThetaRow},对应出基变量为X{item.BaseNum[minThetaRow - 1]},此行系数计算后应为1");
 
 
             // 对应变量出基
-            //Console.WriteLine($"需要操作的变量为({minThetaRow},{minSigCol})={cmt.Get(minThetaRow, minSigCol)}");
+            Console.WriteLine($"需要操作的变量为({minThetaRow},{minSigCol})={cmt.Get(minThetaRow, minSigCol)}");
             double operateValue = cmt.Get(minThetaRow, minSigCol); //行除以需要操作的变量
             int operateRow = minThetaRow, operateCol = minSigCol;
             // 行除变量
@@ -261,7 +271,7 @@ namespace CalCore.LP
                     cmt.Value[i, j] -= operateValue * cmt.Value[operateRow - 1, j];
                 }
             }
-            //Console.WriteLine("相减后:\n" + cmt.ValueString);
+            Console.WriteLine("相减后:\n" + cmt.ValueString);
 
             // 找到每行的基变量
             GetRowBV(cmt, item.BaseNum);
