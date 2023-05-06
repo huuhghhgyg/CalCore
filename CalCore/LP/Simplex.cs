@@ -21,6 +21,45 @@ namespace CalCore.LP
             public IterateState State { get; set; }//迭代状态
         }
 
+        #region 辅助计算
+        /// <summary>
+        /// 矩阵行除某个数
+        /// </summary>
+        /// <param name="mt">输入的矩阵</param>
+        /// <param name="divideVal">数值</param>
+        /// <param name="row">需要处理的行</param>
+        static void MatrixRowDivide(Matrix mt, double divideVal, int row)
+        {
+            for (int j = 0; j < mt.Col; j++) mt.Value[row - 1, j] = mt.Value[row - 1, j] / divideVal;
+        }
+
+        /// <summary>
+        /// 通过矩阵运算将指定列算为基向量，指定行处算为1
+        /// </summary>
+        /// <param name="mt">(约束)矩阵</param>
+        /// <param name="row">行数</param>
+        public static void MatrixMakeBaseVector(Matrix mt, int row, int col)
+        {
+            //如果指定位置不为1，则行除本身
+            if (mt.Get(row, col) != 1) MatrixRowDivide(mt, mt.Get(row, col), row);
+
+            // 其他行的所有变量，用他们本身减去他们本身*操作行
+            for (int i = 0; i < mt.Row; i++) //所有其他行
+            {
+                if (i == row - 1) continue; //如果是操作行则跳过
+                //获取对应变量，作为操作系数
+                double operateValue = mt.Value[i, col - 1];
+
+                //减
+                for (int j = 0; j < mt.Col; j++)
+                {
+                    mt.Value[i, j] -= operateValue * mt.Value[row - 1, j];
+                }
+            }
+        }
+        #endregion
+
+        #region 单纯形算法
         /// <summary>
         /// 根据求解需求（max/min）求Sigma最值
         /// </summary>
@@ -172,11 +211,6 @@ namespace CalCore.LP
             }
         }
 
-        static void MatrixRowDivide(Matrix mt, double divideVal, int row)
-        {
-            for (int j = 0; j < mt.Col; j++) mt.Value[row - 1, j] = mt.Value[row - 1, j] / divideVal;
-        }
-
         /// <summary>
         /// 根据SimplexItem的信息更新Sigma值
         /// </summary>
@@ -234,7 +268,7 @@ namespace CalCore.LP
             {
                 theta[i - 1] = cmt.Get(i, cols) / cmt.Get(i, minSigCol); //b/a （当被除数为0，计算为正无穷）
                 //Console.WriteLine($"theta({i})={cmt.Get(i, cols)}/{cmt.Get(i, minSigCol)}={theta[i - 1]}");
-                if (theta[i - 1] < 0) theta[i - 1] = double.PositiveInfinity; //不允许存在负数（设置为正无穷）
+                if (theta[i - 1] <= 0) theta[i - 1] = double.PositiveInfinity; //不允许存在负数（设置为正无穷）
                 if ((!double.IsNaN(theta[i - 1]) && theta[i - 1] < theta[minThetaRow - 1] || double.IsNaN(theta[minThetaRow - 1]))
                     && cmt.Get(i, minSigCol) != 0) //不允许theta为NaN，不允许操作数为0，否则下次计算会造成混乱
                     minThetaRow = i;
@@ -251,26 +285,9 @@ namespace CalCore.LP
             Console.WriteLine($"需要操作的变量为({minThetaRow},{minSigCol})={cmt.Get(minThetaRow, minSigCol)}");
             double operateValue = cmt.Get(minThetaRow, minSigCol); //行除以需要操作的变量
             int operateRow = minThetaRow, operateCol = minSigCol;
-            // 行除变量
-            for (int i = 0; i < cols; i++)
-            {
-                cmt.Value[operateRow - 1, i] /= operateValue;
-            }
-            //Console.WriteLine("除变量后：\n" + cmt.ValueString);
 
-            // 其他行的所有变量，用他们本身减去他们本身*操作行
-            for (int i = 0; i < rows; i++) //所有其他行
-            {
-                if (i == operateRow - 1) continue; //如果是操作行则跳过
-                //获取对应变量，作为操作系数
-                operateValue = cmt.Value[i, operateCol - 1];
-
-                //减
-                for (int j = 0; j < cols; j++)
-                {
-                    cmt.Value[i, j] -= operateValue * cmt.Value[operateRow - 1, j];
-                }
-            }
+            //通过矩阵运算实现基变换（行除变量、行相减）
+            MatrixMakeBaseVector(cmt, operateRow, operateCol);
             Console.WriteLine("相减后:\n" + cmt.ValueString);
 
             // 找到每行的基变量
@@ -303,5 +320,6 @@ namespace CalCore.LP
 
             return IterateState.Success; //迭代成功
         }
+        #endregion
     }
 }
